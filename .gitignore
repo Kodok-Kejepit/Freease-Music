@@ -11,21 +11,11 @@ Thumbs.db
 *.keystore
 keystore.properties
 local.properties
-.env
-cookies.txt
 
-# Rekaman suara pribadi (Suara Dev)
-android/app/src/main/assets/voice_dev/
-web/voice/
-
-# Hasil build & dependensi
+# Hasil build
 build/
 .gradle/
 .kotlin/
 captures/
-node_modules/
-dist/
-*.tsbuildinfo
 *.apk
 *.aab
-web/data/

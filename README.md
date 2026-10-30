@@ -10,12 +10,18 @@ Semua koleksi dan riwayatmu tersimpan di perangkatmu sendiri.
 
 <br>
 
+[![Versi](https://img.shields.io/github/v/release/Kodok-Kejepit/freease-music?style=for-the-badge&label=Versi&color=5CC8F5)](https://github.com/Kodok-Kejepit/freease-music/releases/latest)
 ![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)
-![Web](https://img.shields.io/badge/Web-PWA-5CC8F5?style=for-the-badge&logo=googlechrome&logoColor=white)
 ![Tanpa iklan](https://img.shields.io/badge/Iklan-0%25-0F2747?style=for-the-badge)
 ![Lisensi](https://img.shields.io/badge/Lisensi-MIT-8ED2F2?style=for-the-badge)
 
-[**Fitur**](#fitur) &nbsp;·&nbsp; [**Tampilan**](#tampilan) &nbsp;·&nbsp; [**Android**](#android) &nbsp;·&nbsp; [**Web**](#web-self-host) &nbsp;·&nbsp; [**Privasi**](#privasi--100-tanpa-iklan) &nbsp;·&nbsp; [**Pembuat**](#pembuat)
+<br>
+
+[![Unduh APK](https://img.shields.io/badge/Unduh_APK-Android-0F2747?style=for-the-badge&logo=android&logoColor=3DDC84&labelColor=16345E)](https://github.com/Kodok-Kejepit/freease-music/releases/latest)
+&nbsp;
+[![Buka Freease Web](https://img.shields.io/badge/Buka_Freease_Web-freease.cloud-0F2747?style=for-the-badge&logo=googlechrome&logoColor=8ED2F2&labelColor=16345E)](https://freease.cloud)
+
+[**Fitur**](#fitur) &nbsp;·&nbsp; [**Tampilan**](#tampilan) &nbsp;·&nbsp; [**Unduh**](#unduh-apk) &nbsp;·&nbsp; [**Freease Web**](#freease-web) &nbsp;·&nbsp; [**Privasi**](#privasi--100-tanpa-iklan) &nbsp;·&nbsp; [**Pembuat**](#pembuat)
 
 </div>
 
@@ -66,7 +72,7 @@ Tanpa akun dan tanpa pelacakan. Koleksi, playlist, unduhan, dan riwayat disimpan
 | Widget layar utama, Android Auto, alarm musik, kenali lagu | Ya | |
 | Cadangan koleksi — **formatnya sama**, bisa pindah dari Android ke Web dan sebaliknya | Ya | Ya |
 
-Daftar lengkap ada di [`android/README.md`](android/README.md) dan [`web/README.md`](web/README.md).
+Daftar lengkap fitur aplikasi Android ada di [`android/README.md`](android/README.md).
 
 ## Tampilan
 
@@ -84,7 +90,41 @@ Daftar lengkap ada di [`android/README.md`](android/README.md) dan [`web/README.
 
 </div>
 
-## Android
+## Unduh APK
+
+1. Buka halaman **[Releases](https://github.com/Kodok-Kejepit/freease-music/releases/latest)**, lalu unduh berkas `Freease-x.x.x.apk`.
+2. Buka berkasnya di HP. Bila diminta, izinkan pemasangan dari sumber ini.
+3. Selesai — buka **Freease** dan mulai dengarkan.
+
+Butuh **Android 8.0** ke atas. Versi baru bisa langsung dipasang menimpa versi lama tanpa kehilangan koleksi.
+
+## Freease Web
+
+<table>
+<tr>
+<td width="62%" valign="top">
+
+Tidak pakai Android, atau sedang di laptop? Buka Freease langsung dari browser:
+
+### [freease.cloud](https://freease.cloud)
+
+- Jalan di **HP, tablet, laptop, dan komputer** — Android, iPhone, Windows, macOS, maupun Linux
+- Mode **YouTube Music** untuk lagu dan **YouTube** untuk semua video, lengkap dengan layar tonton ala YouTube
+- **Subtitle video dengan terjemahan Indonesia**, lirik berjalan, lirik melayang, dan Freease Smart
+- Bisa dipasang seperti aplikasi: di Chrome pilih menu ⋮ → **Tambahkan ke layar utama**
+  (iPhone: Safari → Bagikan → **Tambahkan ke Layar Utama**)
+- Koleksi bisa dipindah dari dan ke aplikasi Android lewat menu **Cadangkan / Pulihkan**
+
+Saat ini Freease Web memakai kata sandi — hubungi pembuat untuk mendapatkan akses.
+
+</td>
+<td width="38%" valign="top" align="center">
+<img src="docs/screenshots/hp-tonton.webp" alt="Layar tonton Freease Web" width="230">
+</td>
+</tr>
+</table>
+
+## Build dari kode sumber
 
 Aplikasi native: **Kotlin · Jetpack Compose · Media3 (ExoPlayer) · ONNX Runtime**. Butuh JDK 17+ dan Android SDK 35.
 
@@ -94,59 +134,34 @@ cd freease-music/android
 ./gradlew assembleDebug      # → app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Untuk APK rilis, buat `android/keystore.properties` (tidak ikut repo):
+APK rilis di halaman Releases dibuat otomatis oleh GitHub Actions ([`.github/workflows/build-apk.yml`](.github/workflows/build-apk.yml)).
+Untuk membuat APK rilis sendiri, buat `android/keystore.properties` (tidak ikut repo):
 
 ```properties
 storeFile=../freease-release.jks
 storePassword=…
-keyAlias=freease
+keyAlias=…
 keyPassword=…
 ```
 
 lalu jalankan `./gradlew assembleRelease`.
 
-> Klip **Suara Dev** (rekaman suara asli pembuat untuk jawaban asisten) tidak disertakan di repo. Tanpa klip itu,
-> asisten tetap menjawab memakai suara bawaan HP. Taruh klip `.ogg` di `android/app/src/main/assets/voice_dev/`
-> untuk memakainya.
-
-## Web (self-host)
-
-Freease Web berjalan di VPS sendiri — cukup **1 vCPU / 1 GB RAM**, Ubuntu atau Debian. Satu perintah memasang
-semuanya: swap, Docker, kata sandi acak, HTTPS otomatis, dan pengamanan server.
-
-```bash
-git clone --depth 1 https://github.com/Kodok-Kejepit/freease-music.git
-cd freease-music/web
-sudo ./install.sh musik.domainmu.com     # tanpa domain: sudo ./install.sh → http://IP-VPS:8080
-```
-
-| Perintah | Fungsi |
-|---|---|
-| `sudo ./update.sh` | Ambil versi terbaru, amankan VPS, bangun ulang, lalu tes |
-| `sudo ./ganti-password.sh` | Ganti kata sandi masuk |
-| `sudo ./secure.sh` | Firewall, fail2ban, perlindungan SYN flood, pembaruan keamanan otomatis |
-
-Panduan lengkap — variabel lingkungan, cookies, Cloudflare, dan kebutuhan bandwidth — ada di [`web/README.md`](web/README.md).
-
 ## Privasi & 100% tanpa iklan
 
 - **Tanpa player YouTube.** Iklan YouTube hanya disisipkan oleh player resminya; Freease tidak pernah memakainya.
-  Sebuah tes otomatis menggagalkan build bila ada kode yang memuat player/iframe YouTube atau skrip jaringan iklan.
+  Yang diputar adalah berkas audio & video aslinya.
 - **Sponsor di dalam video** dilewati lewat data komunitas SponsorBlock. Hanya 4 karakter awal hash id video yang
   dikirim, jadi layanan itu tidak tahu video apa yang ditonton.
-- **Tanpa akun & pelacakan.** Riwayat, koleksi, unduhan, lirik, dan pengaturan disimpan di perangkat. Server Web
-  hanya meneruskan lagu & lirik, tidak menulis apa pun ke disk, dan tidak mencatat kata kunci pencarian.
+- **Tanpa akun & pelacakan.** Riwayat, koleksi, unduhan, lirik, dan pengaturan disimpan di perangkatmu sendiri —
+  di aplikasi maupun di Freease Web.
 
 ## Struktur
 
 ```
 freease-music/
-├── android/     Aplikasi Android (Kotlin, Jetpack Compose, Media3)
-├── web/
-│   ├── client/  Aplikasi web (React, TypeScript, Vite, PWA)
-│   ├── server/  Server API & stream (Node.js, Express, yt-dlp)
-│   └── *.sh     Pemasangan, pembaruan & pengamanan VPS
-└── docs/        Banner, logo & tangkapan layar
+├── android/              Aplikasi Android (Kotlin, Jetpack Compose, Media3)
+├── docs/                 Banner, logo & tangkapan layar
+└── .github/workflows/    Build APK otomatis ke halaman Releases
 ```
 
 ## Kontribusi
@@ -155,8 +170,6 @@ Laporan bug, ide fitur, dan pull request sangat diterima — buka lewat
 [Issues](https://github.com/Kodok-Kejepit/freease-music/issues). Sebelum mengirim perubahan:
 
 ```bash
-cd web/client && npm test        # tes klien (termasuk penjaga tanpa-iklan & tanpa-emoji)
-cd web/server && npm test        # tes server
 cd android && ./gradlew testDebugUnitTest
 ```
 
@@ -165,7 +178,7 @@ cd android && ./gradlew testDebugUnitTest
 <table>
 <tr>
 <td width="120" align="center" valign="top">
-<img src="web/client/public/kodok-kejepit.webp" width="100" alt="Kodok-Kejepit">
+<img src="docs/kodok-kejepit.webp" width="100" alt="Kodok-Kejepit">
 </td>
 <td valign="top">
 

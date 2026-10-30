@@ -1,8 +1,0 @@
-node_modules/
-dist/
-*.log
-.env
-cookies.txt
-voice/
-*.tsbuildinfo
-data/

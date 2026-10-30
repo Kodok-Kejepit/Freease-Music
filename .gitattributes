@@ -1,4 +1,4 @@
-# Akhir baris LF untuk semua teks (skrip .sh & gradlew harus LF supaya bisa dijalankan di Linux/VPS)
+# Akhir baris LF untuk semua teks (gradlew harus LF supaya bisa dijalankan di Linux & GitHub Actions)
 * text=auto eol=lf
 *.bat text eol=crlf
 
