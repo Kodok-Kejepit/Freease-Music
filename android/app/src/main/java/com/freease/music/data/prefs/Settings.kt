@@ -1,0 +1,280 @@
+package com.freease.music.data.prefs
+
+import android.content.Context
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+enum class AudioQuality(val label: String, val desc: String) {
+    MAX("Tertinggi", "Opus/AAC bitrate tertinggi (≈160–256 kbps)"),
+    NORMAL("Normal", "≈128 kbps, seimbang"),
+    SAVER("Hemat data", "≈50–70 kbps"),
+}
+
+data class AppSettings(
+    val audioQuality: AudioQuality = AudioQuality.MAX,
+    val saverOnCellular: Boolean = false,
+    val videoQuality: Int = 720,
+    val crossfadeSec: Int = 0,
+    val fadePlayPause: Boolean = true,
+    val skipSilence: Boolean = false,
+    val autoplay: Boolean = true,
+    val cacheSizeMb: Int = 1024,
+    val accent: Int = 0,
+    val dynamicColor: Boolean = true,
+    val amoled: Boolean = false,
+    val eqEnabled: Boolean = false,
+    val eqPreset: Int = -1,
+    val eqBands: List<Int> = emptyList(),
+    val bassBoost: Int = 0,
+    val virtualizer: Int = 0,
+    val loudnessGain: Int = 0,
+    val region: String = "ID",
+    val downloadWifiOnly: Boolean = false,
+    val showLyricsCard: Boolean = true,
+    /** Selaraskan lirik video klip otomatis lewat suaranya (unduh ±1,5 MB audio per lagu, sekali saja). */
+    val autoSyncLyrics: Boolean = true,
+    /** Samakan kekerasan suara antarlagu (seperti Spotify). */
+    val normalizeVolume: Boolean = true,
+    /** 0 = Pelan (−19 LUFS), 1 = Normal (−14), 2 = Keras (−11). */
+    val normalizeLevel: Int = 1,
+    /** Gelembung lirik di atas aplikasi lain. */
+    val floatingLyrics: Boolean = false,
+    /** Baris lirik di notifikasi & layar kunci. */
+    val lyricsNotification: Boolean = false,
+    /** Baris aktif terisi per kata seperti karaoke. */
+    val karaokeLyrics: Boolean = true,
+    /** Tampilkan cara baca latin untuk lirik Korea/Jepang. */
+    val romanizeLyrics: Boolean = true,
+    /** Terjemahan Bahasa Indonesia di bawah tiap baris lirik berbahasa asing. */
+    val translateLyrics: Boolean = false,
+    /** Setelan equalizer tersimpan per perangkat (speaker/headset/Bluetooth). */
+    val eqPerDevice: Boolean = true,
+    val resumeOnStart: Boolean = true,
+    val smartMode: Boolean = true,
+    /** Mode acak yang menyelipkan rekomendasi berdasarkan isi playlist (tombol acak ditekan 2×). */
+    val smartShuffle: Boolean = false,
+    /** Canvas (video pendek berulang di player): 0 = mati, 1 = hanya Wi-Fi, 2 = selalu. */
+    val canvasMode: Int = 1,
+    /** Asisten Freease menjawab dengan suara. */
+    val assistantVoice: Boolean = true,
+    /** "Oke Freease" tanpa menyentuh tombol (selama aplikasi terbuka). */
+    val wakeWord: Boolean = false,
+    /** Suara jawaban asisten: "mine" (paket suara sendiri), "tts" (suara HP), "off". */
+    val replyVoice: String = "mine",
+    /** Folder (URI SAF) untuk cadangan otomatis mingguan; kosong = mati. */
+    val autoBackupFolder: String = "",
+    val lastAutoBackup: Long = 0L,
+    /** Model AI Mode Karaoke yang dipilih ("hq3" / "kara"); kosong = belum pernah memilih. */
+    val karaokeModel: String = "",
+    /** Suasana Freease Pintar: "" (biasa), "focus", "chill", "workout", "sleep". */
+    val smartMood: String = "",
+    /** Kualitas yang dipakai saat di jaringan seluler (kalau [saverOnCellular] aktif). */
+    val cellularQuality: AudioQuality = AudioQuality.SAVER,
+    val autoDownload: Boolean = false,
+    /** Timer tidur otomatis kalau tidak ada interaksi selama sekian menit (0 = mati). */
+    val idleSleepMin: Int = 0,
+    /** Lewati bagian non-musik (intro/outro ngobrol) di video klip, data SponsorBlock. */
+    val skipNonMusic: Boolean = true,
+    /** Crossfade pintar: tanpa jeda (gapless) antar-lagu satu album, crossfade biasa selainnya. */
+    val smartCrossfade: Boolean = true,
+    /** Volume vokal asli di Mode Karaoke 0..100 (0 = vokal hilang). */
+    val vocalLevel: Int = 0,
+    /** Kualitas audio turun otomatis saat baterai < 15% (dan tidak dicas). */
+    val batterySaver: Boolean = true,
+    /** Lirik ikut disimpan saat lagu diunduh. */
+    val offlineLyrics: Boolean = true,
+)
+
+private val Context.dataStore by preferencesDataStore("freease_settings")
+
+class SettingsRepository(private val context: Context, scope: CoroutineScope) {
+    private object K {
+        val audioQuality = stringPreferencesKey("audio_quality")
+        val saverOnCellular = booleanPreferencesKey("saver_cellular")
+        val videoQuality = intPreferencesKey("video_quality")
+        val crossfade = intPreferencesKey("crossfade")
+        val fade = booleanPreferencesKey("fade_play_pause")
+        val skipSilence = booleanPreferencesKey("skip_silence")
+        val autoplay = booleanPreferencesKey("autoplay")
+        val cacheSize = intPreferencesKey("cache_size")
+        val accent = intPreferencesKey("accent")
+        val dynamicColor = booleanPreferencesKey("dynamic_color")
+        val amoled = booleanPreferencesKey("amoled")
+        val eqEnabled = booleanPreferencesKey("eq_enabled")
+        val eqPreset = intPreferencesKey("eq_preset")
+        val eqBands = stringPreferencesKey("eq_bands")
+        val bass = intPreferencesKey("bass_boost")
+        val virt = intPreferencesKey("virtualizer")
+        val loud = intPreferencesKey("loudness")
+        val region = stringPreferencesKey("region")
+        val wifiOnly = booleanPreferencesKey("dl_wifi_only")
+        val lyricsCard = booleanPreferencesKey("lyrics_card")
+        val autoSyncLyrics = booleanPreferencesKey("auto_sync_lyrics")
+        val normalizeVolume = booleanPreferencesKey("normalize_volume")
+        val normalizeLevel = intPreferencesKey("normalize_level")
+        val floatingLyrics = booleanPreferencesKey("floating_lyrics")
+        val lyricsNotification = booleanPreferencesKey("lyrics_notification")
+        val karaokeLyrics = booleanPreferencesKey("karaoke_lyrics")
+        val romanizeLyrics = booleanPreferencesKey("romanize_lyrics")
+        val translateLyrics = booleanPreferencesKey("translate_lyrics")
+        val eqPerDevice = booleanPreferencesKey("eq_per_device")
+        val resume = booleanPreferencesKey("resume_on_start")
+        val smart = booleanPreferencesKey("smart_mode")
+        val smartShuffle = booleanPreferencesKey("smart_shuffle")
+        val canvas = intPreferencesKey("canvas_mode")
+        val assistantVoice = booleanPreferencesKey("assistant_voice")
+        val wakeWord = booleanPreferencesKey("wake_word")
+        val replyVoice = stringPreferencesKey("reply_voice")
+        val autoBackupFolder = stringPreferencesKey("auto_backup_folder")
+        val lastAutoBackup = longPreferencesKey("last_auto_backup")
+        val karaokeModel = stringPreferencesKey("karaoke_model")
+        val mood = stringPreferencesKey("smart_mood")
+        val cellularQuality = stringPreferencesKey("cellular_quality")
+        val autoDl = booleanPreferencesKey("auto_download")
+        val idleSleep = intPreferencesKey("idle_sleep_min")
+        val skipNonMusic = booleanPreferencesKey("skip_non_music")
+        val smartCrossfade = booleanPreferencesKey("smart_crossfade")
+        val vocalLevel = intPreferencesKey("vocal_level")
+        val batterySaver = booleanPreferencesKey("battery_saver")
+        val offlineLyrics = booleanPreferencesKey("offline_lyrics")
+    }
+
+    private fun read(p: Preferences) = AppSettings(
+        audioQuality = p[K.audioQuality]?.let { runCatching { AudioQuality.valueOf(it) }.getOrNull() } ?: AudioQuality.MAX,
+        saverOnCellular = p[K.saverOnCellular] ?: false,
+        videoQuality = p[K.videoQuality] ?: 720,
+        crossfadeSec = p[K.crossfade] ?: 0,
+        fadePlayPause = p[K.fade] ?: true,
+        skipSilence = p[K.skipSilence] ?: false,
+        autoplay = p[K.autoplay] ?: true,
+        cacheSizeMb = p[K.cacheSize] ?: 1024,
+        accent = p[K.accent] ?: 0,
+        dynamicColor = p[K.dynamicColor] ?: true,
+        amoled = p[K.amoled] ?: false,
+        eqEnabled = p[K.eqEnabled] ?: false,
+        eqPreset = p[K.eqPreset] ?: -1,
+        eqBands = p[K.eqBands]?.split(',')?.mapNotNull { it.toIntOrNull() } ?: emptyList(),
+        bassBoost = p[K.bass] ?: 0,
+        virtualizer = p[K.virt] ?: 0,
+        loudnessGain = p[K.loud] ?: 0,
+        region = p[K.region] ?: "ID",
+        downloadWifiOnly = p[K.wifiOnly] ?: false,
+        showLyricsCard = p[K.lyricsCard] ?: true,
+        autoSyncLyrics = p[K.autoSyncLyrics] ?: true,
+        normalizeVolume = p[K.normalizeVolume] ?: true,
+        normalizeLevel = p[K.normalizeLevel] ?: 1,
+        floatingLyrics = p[K.floatingLyrics] ?: false,
+        lyricsNotification = p[K.lyricsNotification] ?: false,
+        karaokeLyrics = p[K.karaokeLyrics] ?: true,
+        romanizeLyrics = p[K.romanizeLyrics] ?: true,
+        translateLyrics = p[K.translateLyrics] ?: false,
+        eqPerDevice = p[K.eqPerDevice] ?: true,
+        resumeOnStart = p[K.resume] ?: true,
+        smartMode = p[K.smart] ?: true,
+        smartShuffle = p[K.smartShuffle] ?: false,
+        canvasMode = p[K.canvas] ?: 1,
+        assistantVoice = p[K.assistantVoice] ?: true,
+        wakeWord = p[K.wakeWord] ?: false,
+        replyVoice = p[K.replyVoice] ?: "mine",
+        autoBackupFolder = p[K.autoBackupFolder] ?: "",
+        lastAutoBackup = p[K.lastAutoBackup] ?: 0L,
+        karaokeModel = p[K.karaokeModel] ?: "",
+        smartMood = p[K.mood] ?: "",
+        cellularQuality = p[K.cellularQuality]?.let { runCatching { AudioQuality.valueOf(it) }.getOrNull() } ?: AudioQuality.SAVER,
+        autoDownload = p[K.autoDl] ?: false,
+        idleSleepMin = p[K.idleSleep] ?: 0,
+        skipNonMusic = p[K.skipNonMusic] ?: true,
+        smartCrossfade = p[K.smartCrossfade] ?: true,
+        vocalLevel = p[K.vocalLevel] ?: 0,
+        batterySaver = p[K.batterySaver] ?: true,
+        offlineLyrics = p[K.offlineLyrics] ?: true,
+    )
+
+    /** Dibaca sekali secara sinkron saat start supaya service langsung punya nilai yang benar. */
+    private val initial: AppSettings = runBlocking { read(context.dataStore.data.first()) }
+
+    val flow: StateFlow<AppSettings> =
+        context.dataStore.data.map(::read).stateIn(scope, SharingStarted.Eagerly, initial)
+
+    val current: AppSettings get() = flow.value
+
+    private val writeScope = scope
+
+    private fun edit(block: (androidx.datastore.preferences.core.MutablePreferences) -> Unit) {
+        writeScope.launch { context.dataStore.edit { block(it) } }
+    }
+
+    fun setAudioQuality(v: AudioQuality) = edit { it[K.audioQuality] = v.name }
+    fun setSaverOnCellular(v: Boolean) = edit { it[K.saverOnCellular] = v }
+    fun setVideoQuality(v: Int) = edit { it[K.videoQuality] = v }
+    fun setCrossfade(v: Int) = edit { it[K.crossfade] = v }
+    fun setSkipNonMusic(v: Boolean) = edit { it[K.skipNonMusic] = v }
+    fun setSmartCrossfade(v: Boolean) = edit { it[K.smartCrossfade] = v }
+    fun setVocalLevel(v: Int) = edit { it[K.vocalLevel] = v }
+    fun setBatterySaver(v: Boolean) = edit { it[K.batterySaver] = v }
+    fun setOfflineLyrics(v: Boolean) = edit { it[K.offlineLyrics] = v }
+    fun setFadePlayPause(v: Boolean) = edit { it[K.fade] = v }
+    fun setSkipSilence(v: Boolean) = edit { it[K.skipSilence] = v }
+    fun setAutoplay(v: Boolean) = edit { it[K.autoplay] = v }
+    fun setCacheSize(v: Int) = edit { it[K.cacheSize] = v }
+    fun setAccent(v: Int) = edit { it[K.accent] = v }
+    fun setDynamicColor(v: Boolean) = edit { it[K.dynamicColor] = v }
+    fun setAmoled(v: Boolean) = edit { it[K.amoled] = v }
+    fun setEqEnabled(v: Boolean) = edit { it[K.eqEnabled] = v }
+    fun setEq(preset: Int, bands: List<Int>) = edit {
+        it[K.eqPreset] = preset
+        it[K.eqBands] = bands.joinToString(",")
+    }
+    fun setBassBoost(v: Int) = edit { it[K.bass] = v }
+    fun setVirtualizer(v: Int) = edit { it[K.virt] = v }
+    fun setLoudness(v: Int) = edit { it[K.loud] = v }
+
+    /** Seluruh setelan efek suara sekaligus (dipakai saat berganti perangkat keluaran). */
+    fun setEqProfile(enabled: Boolean, preset: Int, bands: List<Int>, bass: Int, virt: Int, loud: Int) = edit {
+        it[K.eqEnabled] = enabled
+        it[K.eqPreset] = preset
+        it[K.eqBands] = bands.joinToString(",")
+        it[K.bass] = bass
+        it[K.virt] = virt
+        it[K.loud] = loud
+    }
+    fun setRegion(v: String) = edit { it[K.region] = v }
+    fun setDownloadWifiOnly(v: Boolean) = edit { it[K.wifiOnly] = v }
+    fun setShowLyricsCard(v: Boolean) = edit { it[K.lyricsCard] = v }
+    fun setAutoSyncLyrics(v: Boolean) = edit { it[K.autoSyncLyrics] = v }
+    fun setNormalizeVolume(v: Boolean) = edit { it[K.normalizeVolume] = v }
+    fun setNormalizeLevel(v: Int) = edit { it[K.normalizeLevel] = v }
+    fun setFloatingLyrics(v: Boolean) = edit { it[K.floatingLyrics] = v }
+    fun setLyricsNotification(v: Boolean) = edit { it[K.lyricsNotification] = v }
+    fun setKaraokeLyrics(v: Boolean) = edit { it[K.karaokeLyrics] = v }
+    fun setRomanizeLyrics(v: Boolean) = edit { it[K.romanizeLyrics] = v }
+    fun setTranslateLyrics(v: Boolean) = edit { it[K.translateLyrics] = v }
+    fun setEqPerDevice(v: Boolean) = edit { it[K.eqPerDevice] = v }
+    fun setResumeOnStart(v: Boolean) = edit { it[K.resume] = v }
+    fun setSmartMode(v: Boolean) = edit { it[K.smart] = v }
+    fun setSmartShuffle(v: Boolean) = edit { it[K.smartShuffle] = v }
+    fun setCanvasMode(v: Int) = edit { it[K.canvas] = v }
+    fun setAssistantVoice(v: Boolean) = edit { it[K.assistantVoice] = v }
+    fun setWakeWord(v: Boolean) = edit { it[K.wakeWord] = v }
+    fun setReplyVoice(v: String) = edit { it[K.replyVoice] = v }
+    fun setAutoBackupFolder(v: String) = edit { it[K.autoBackupFolder] = v }
+    fun setLastAutoBackup(v: Long) = edit { it[K.lastAutoBackup] = v }
+    fun setKaraokeModel(v: String) = edit { it[K.karaokeModel] = v }
+    fun setSmartMood(v: String) = edit { it[K.mood] = v }
+    fun setCellularQuality(v: AudioQuality) = edit { it[K.cellularQuality] = v.name }
+    fun setAutoDownload(v: Boolean) = edit { it[K.autoDl] = v }
+    fun setIdleSleepMin(v: Int) = edit { it[K.idleSleep] = v }
+}

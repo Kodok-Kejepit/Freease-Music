@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tekan lama ikon Freease: pintasan langsung ke asisten suara & Kenali Lagu. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_mic"
+        android:shortcutId="assistant"
+        android:shortcutShortLabel="@string/shortcut_assistant">
+        <intent
+            android:action="com.freease.music.ASSISTANT"
+            android:targetClass="com.freease.music.MainActivity"
+            android:targetPackage="com.freease.music" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_recognize"
+        android:shortcutId="recognize"
+        android:shortcutShortLabel="@string/shortcut_recognize">
+        <intent
+            android:action="com.freease.music.RECOGNIZE"
+            android:targetClass="com.freease.music.MainActivity"
+            android:targetPackage="com.freease.music" />
+    </shortcut>
+</shortcuts>

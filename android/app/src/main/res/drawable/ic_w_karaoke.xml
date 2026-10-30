@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mikrofon genggam (karaoke): kepala bulat + gagang miring. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M15,2a5,5 0,1 1,0 10a5,5 0,1 1,0 -10z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M10.4,9.4L14.6,13.6L6.3,21.3Q5.6,21.9 4.9,21.3L2.7,19.1Q2.1,18.4 2.7,17.7Z" />
+</vector>

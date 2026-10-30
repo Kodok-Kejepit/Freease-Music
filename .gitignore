@@ -1,0 +1,31 @@
+# Sistem & editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+*.log
+
+# Rahasia — jangan pernah di-commit
+*.jks
+*.keystore
+keystore.properties
+local.properties
+.env
+cookies.txt
+
+# Rekaman suara pribadi (Suara Dev)
+android/app/src/main/assets/voice_dev/
+web/voice/
+
+# Hasil build & dependensi
+build/
+.gradle/
+.kotlin/
+captures/
+node_modules/
+dist/
+*.tsbuildinfo
+*.apk
+*.aab
+web/data/

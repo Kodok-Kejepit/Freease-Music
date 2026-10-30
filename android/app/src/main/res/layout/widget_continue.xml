@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="6dp"
+        android:paddingBottom="6dp"
+        android:text="@string/widget_continue_header"
+        android:textColor="#FFFFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/wc_1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/widget_tile_1"
+            android:gravity="bottom|start"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="12dp">
+
+            <ImageView
+                android:id="@+id/wc_1_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/wc_1_text"
+                style="@style/WidgetTileText" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/wc_2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            
+            android:background="@drawable/widget_tile_2"
+            android:gravity="bottom|start"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="12dp">
+
+            <ImageView
+                android:id="@+id/wc_2_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/wc_2_text"
+                style="@style/WidgetTileText" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="6dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/wc_3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/widget_tile_3"
+            android:gravity="bottom|start"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="12dp">
+
+            <ImageView
+                android:id="@+id/wc_3_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/wc_3_text"
+                style="@style/WidgetTileText" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/wc_4"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            
+            android:background="@drawable/widget_tile_4"
+            android:gravity="bottom|start"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="12dp">
+
+            <ImageView
+                android:id="@+id/wc_4_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="8dp"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/wc_4_text"
+                style="@style/WidgetTileText" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

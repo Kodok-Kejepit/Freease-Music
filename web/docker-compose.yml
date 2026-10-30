@@ -1,0 +1,57 @@
+# Cara termudah: sudo ./install.sh            (atau: sudo ./install.sh musik.domainmu.com  untuk HTTPS)
+# Manual:        cp .env.example .env && nano .env && docker compose up -d --build
+services:
+  freease:
+    build: .
+    restart: unless-stopped
+    ports:
+      # Dengan domain (HTTPS lewat Caddy) install.sh mengisi BIND_ADDR=127.0.0.1 supaya port 8080 tidak terbuka
+      # ke internet — Docker melewati firewall ufw, jadi pembatasan harus di sini.
+      - "${BIND_ADDR:-0.0.0.0}:8080:8080"
+    env_file: .env
+    environment:
+      # Penyedia PO Token (layanan di bawah) — membantu lolos cek "bukan bot" YouTube di IP server.
+      POT_PROVIDER_URL: "http://bgutil:4416"
+      # Hemat RAM untuk VPS 1 GB.
+      NODE_OPTIONS: "--max-old-space-size=192"
+      YTDLP_CONCURRENCY: "2"
+    volumes:
+      # Suara Dev (Kodok-Kejepit): isi folder ./voice dengan greet.ogg, ack.ogg, dst.
+      - ./voice:/app/voice:ro
+      # Cookies YouTube (opsional): taruh cookies.txt di folder ini lalu isi YT_COOKIES_FILE=/app/data/cookies.txt di .env
+      - ./data:/app/data:ro
+    mem_limit: 450m
+    logging: &logs
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    depends_on:
+      - bgutil
+
+  bgutil:
+    image: brainicism/bgutil-ytdlp-pot-provider:latest
+    restart: unless-stopped
+    init: true
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=160"
+    mem_limit: 300m
+    logging: *logs
+
+  # HTTPS otomatis (Let's Encrypt) — aktif dengan: docker compose --profile https up -d
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["https"]
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file: .env
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    mem_limit: 80m
+    logging: *logs
+    depends_on:
+      - freease
+
+volumes:
+  caddy_data:

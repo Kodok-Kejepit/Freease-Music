@@ -1,0 +1,15 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+captures/
+.externalNativeBuild/
+.cxx/
+*.keystore
+*.jks
+keystore.properties
+
+# Suara Dev (rekaman pribadi) tidak ikut repo publik; disertakan di zip sumber.
+app/src/main/assets/voice_dev/

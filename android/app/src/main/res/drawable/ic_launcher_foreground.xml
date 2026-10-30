@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logo Freease: huruf F dari dua sayap bergradasi putih ke biru muda. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.385"
+        android:scaleY="0.385"
+        android:translateX="33.98"
+        android:translateY="33.21">
+        <path android:pathData="M5.4 62 C 3.4 28, 20 4, 41 3.5 L 92 2.6 C 99.2 2.4, 99 7.5, 96.6 13.5 C 94.4 19.5, 92 31, 83.6 33.9 L 37 36.4 C 20.5 37.6, 9.4 46.5, 5.4 62 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="5.4" android:startY="2.4" android:endX="99" android:endY="23">
+                    <item android:color="#FFF7FCFF" android:offset="0" />
+                    <item android:color="#FFD6EEFB" android:offset="0.55" />
+                    <item android:color="#FF8ED2F2" android:offset="1" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M5.6 81 C 6 59, 18 46, 34.5 45 L 62.5 43.6 C 68.6 43.3, 68.4 48, 66.6 52.2 C 64.8 56.6, 62.8 62.4, 56.6 62.9 L 50.5 63.4 C 42.6 64, 38.6 68.6, 38.2 76.5 C 37.8 89, 34 99.5, 26.5 103.4 Q 25 104.2 22.5 104.4 L 9.8 105.8 Q 5.4 106.3 5.4 102 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="5.4" android:startY="43.3" android:endX="62" android:endY="106.3">
+                    <item android:color="#FFF2FAFF" android:offset="0" />
+                    <item android:color="#FF93D4F2" android:offset="1" />
+                </gradient>
+            </aapt:attr>
+        </path>
+    </group>
+</vector>

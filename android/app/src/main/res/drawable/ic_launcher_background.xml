@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Latar ikon: biru tua bergradasi, cahaya lembut di belakang huruf F, dan gelombang tipis. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="108" android:endY="108">
+                <item android:color="#FF16345E" android:offset="0" />
+                <item android:color="#FF0A1A33" android:offset="1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="radial" android:centerX="48" android:centerY="48" android:gradientRadius="44">
+                <item android:color="#615CC8F5" android:offset="0" />
+                <item android:color="#005CC8F5" android:offset="1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <group android:scaleX="0.1406" android:scaleY="0.1406" android:translateX="18" android:translateY="18">
+        <path android:pathData="M300,410 C340,380 370,440 410,410 S470,380 500,400" android:strokeColor="#528ED2F2" android:strokeWidth="5" android:strokeLineCap="round" />
+        <path android:pathData="M282,440 C330,405 368,470 414,438 S476,405 512,428" android:strokeColor="#338ED2F2" android:strokeWidth="3.5" android:strokeLineCap="round" />
+    </group>
+</vector>

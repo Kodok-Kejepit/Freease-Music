@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ikon bertema (Android 13+): huruf F satu warna. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.385"
+        android:scaleY="0.385"
+        android:translateX="33.98"
+        android:translateY="33.21">
+        <path android:fillColor="#FFFFFFFF" android:pathData="M5.4 62 C 3.4 28, 20 4, 41 3.5 L 92 2.6 C 99.2 2.4, 99 7.5, 96.6 13.5 C 94.4 19.5, 92 31, 83.6 33.9 L 37 36.4 C 20.5 37.6, 9.4 46.5, 5.4 62 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M5.6 81 C 6 59, 18 46, 34.5 45 L 62.5 43.6 C 68.6 43.3, 68.4 48, 66.6 52.2 C 64.8 56.6, 62.8 62.4, 56.6 62.9 L 50.5 63.4 C 42.6 64, 38.6 68.6, 38.2 76.5 C 37.8 89, 34 99.5, 26.5 103.4 Q 25 104.2 22.5 104.4 L 9.8 105.8 Q 5.4 106.3 5.4 102 Z" />
+    </group>
+</vector>

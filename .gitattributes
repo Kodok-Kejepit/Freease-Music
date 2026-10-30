@@ -1,0 +1,11 @@
+# Akhir baris LF untuk semua teks (skrip .sh & gradlew harus LF supaya bisa dijalankan di Linux/VPS)
+* text=auto eol=lf
+*.bat text eol=crlf
+
+# Berkas biner
+*.png binary
+*.jpg binary
+*.webp binary
+*.ogg binary
+*.jar binary
+*.onnx binary
