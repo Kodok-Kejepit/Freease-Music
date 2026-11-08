@@ -109,14 +109,16 @@ Pull request juga boleh banget. Sebelum kirim, jalankan dulu `./gradlew testDebu
 
 <table>
 <tr>
-<td width="110" valign="top"><img src="docs/kodok-kejepit.webp" width="96" alt="Kodok-Kejepit"></td>
+<td width="110" valign="top"><img src="docs/kodok-kejepit.webp" width="96" alt="Muhamad Surya Widianto"></td>
 <td valign="top">
 
-Aku [Kodok-Kejepit](https://github.com/Kodok-Kejepit), suka bongkar cara kerja sesuatu terus bikin versi sendiri.
+Aku **Muhamad Surya Widianto** ([@Kodok-Kejepit](https://github.com/Kodok-Kejepit)), suka bongkar cara kerja sesuatu terus bikin versi sendiri.
 Proyek lain yang juga lagi aku kerjain:
 
-- [JawaRustGo++](https://jawarustgoplusplus.web.id), bahasa pemrograman dengan pesan error berbahasa Indonesia, ditulis pakai Rust ([kode](https://github.com/Kodok-Kejepit/jrg))
+- [JawaRustGo++](https://jrg-lang.org), bahasa pemrograman dengan pesan error berbahasa Indonesia, ditulis pakai Rust ([kode](https://github.com/Kodok-Kejepit/jrg))
 - [Freease OSINT Tool](https://github.com/Kodok-Kejepit/freease), tool recon dan audit keamanan berbasis terminal
+
+Profil lengkap dan perjalanan aku: [jrg-lang.org/profil.html](https://jrg-lang.org/profil.html). Web Freease: [freease.cloud](https://freease.cloud).
 
 Kalau Freease kepake buat kamu, kasih bintang di repo ini ya. Itu cukup bikin semangat.
 
@@ -135,3 +137,7 @@ Dirilis dengan lisensi [MIT](LICENSE).
 <br>
 <img src="docs/wave.svg" alt="" width="100%">
 </div>
+
+## Lisensi
+
+[MIT](LICENSE) © 2026 Muhamad Surya Widianto.
