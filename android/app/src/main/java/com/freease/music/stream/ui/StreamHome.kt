@@ -59,7 +59,7 @@ private val TABS = listOf("anime" to "Anime", "donghua" to "Donghua", "komik" to
 @Composable
 fun StreamHomeScreen(initialTab: String) {
     val actions = LocalActions.current
-    var tab by rememberSaveable { mutableStateOf(initialTab.takeIf { t -> TABS.any { it.first == t } } ?: "anime") }
+    var tab by rememberSaveable(initialTab) { mutableStateOf(initialTab.takeIf { t -> TABS.any { it.first == t } } ?: "anime") }
     val accent = Freease.accent
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = LocalBottomInset.current + 16.dp)) {
         item {

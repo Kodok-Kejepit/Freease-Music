@@ -83,6 +83,11 @@ enum class Page(val label: String) {
     VOICE_PACK("Suara Dev"),
     PLAYER("Pemutar"),
     QUEUE("Antrean"),
+    STREAM("Freease Stream"),
+    ANIME("Anime"),
+    DONGHUA("Donghua"),
+    KOMIK("Komik"),
+    STREAM_SCHEDULE("Jadwal rilis"),
 }
 
 /**
@@ -123,6 +128,12 @@ object VoiceParser {
         Page.VOICE_PACK to "(suara (dev|developer|kodok)( kejepit)?|paket suara|kodok kejepit)",
         Page.QUEUE to "(antrean|antrian|queue|daftar putar( berikutnya)?|lagu (berikutnya|selanjutnya) apa saja)",
         Page.PLAYER to "(pemutar|player|now playing|lagu yang (sedang|lagi) (di ?putar|main))",
+        // Freease Stream: anime, donghua, komik, dan jadwal rilisnya.
+        Page.STREAM_SCHEDULE to "(jadwal|schedule)( rilis| tayang)?( anime| donghua)?",
+        Page.DONGHUA to "(nonton |tonton )?(donghua|anime (china|cina|tiongkok))",
+        Page.KOMIK to "(baca )?(komik|manga|manhwa|manhua|webtoon)",
+        Page.ANIME to "(nonton |tonton )?anime",
+        Page.STREAM to "(freease |frees )?stream(ing)?",
         Page.SEARCH to "(pencarian|cari|search|halaman cari)",
         Page.LIBRARY to "(koleksi|library|perpustakaan|pustaka|playlist saya|playlist ku|playlistku)",
         Page.HOME to "(beranda|home|halaman (utama|depan|awal)|menu utama|depan|awal)",
