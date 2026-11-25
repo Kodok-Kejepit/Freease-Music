@@ -176,7 +176,7 @@ private fun Player(ep: EpisodeData, full: Boolean, onFull: (Boolean) -> Unit) {
     val src = list.getOrNull(idx)
     val anime = ep.anime
 
-    val player = remember { ExoPlayer.Builder(ctx).build() }
+    val player = remember { ExoPlayer.Builder(ctx).setUsePlatformDiagnostics(false).build() }
     DisposableEffect(Unit) { onDispose { player.release() } }
 
     fun save() {
@@ -197,7 +197,7 @@ private fun Player(ep: EpisodeData, full: Boolean, onFull: (Boolean) -> Unit) {
         player.setMediaSource(ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(Uri.parse(s.url))), resume)
         player.prepare()
         player.playWhenReady = true
-        c.player.pause()
+        if (c.player.state.value.isPlaying) c.player.pause()
     }
 
     DisposableEffect(player, list, idx) {
@@ -209,7 +209,7 @@ private fun Player(ep: EpisodeData, full: Boolean, onFull: (Boolean) -> Unit) {
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) { save(); if (ep.next != null && prefs.getBoolean("autonext", true)) countdown = 8 }
             }
-            override fun onIsPlayingChanged(isPlaying: Boolean) { if (!isPlaying) save() else c.player.pause() }
+            override fun onIsPlayingChanged(isPlaying: Boolean) { if (!isPlaying) save() else if (c.player.state.value.isPlaying) c.player.pause() }
         }
         player.addListener(l)
         onDispose { player.removeListener(l); save() }

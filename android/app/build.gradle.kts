@@ -71,7 +71,9 @@ android {
                 test.systemProperty("robolectric.offline", "true")
                 test.systemProperty("robolectric.dependency.dir", it)
             }
+            // Uji Stream yang butuh internet hanya dimuat bila diminta (-PstreamLive).
             if (project.hasProperty("streamLive")) test.systemProperty("stream.live", "true")
+            else test.exclude("**/StreamLiveProbe*", "**/StreamScreenshotTest*")
             project.findProperty("recognize.pcm")?.let { test.systemProperty("recognize.pcm", it) }
             project.findProperty("karaoke.pcm")?.let { test.systemProperty("karaoke.pcm", it) }
             project.findProperty("karaoke.mix")?.let { test.systemProperty("karaoke.mix", it) }
