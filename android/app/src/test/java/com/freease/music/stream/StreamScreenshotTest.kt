@@ -48,6 +48,9 @@ class StreamScreenshotTest {
         fun shot(name: String, route: String, wait: Long) {
             compose.runOnUiThread { actions!!.navigate(route) }
             settle(wait)
+            // Lembar izin muncul otomatis saat pertama dibuka; tutup seperti menekan "Nanti saja".
+            compose.runOnUiThread { actions!!.permissions = null }
+            settle(600)
             compose.onRoot().captureRoboImage("$out/$name.png")
         }
         shot("01_stream_anime", StreamRoutes.home("anime"), 12_000)
