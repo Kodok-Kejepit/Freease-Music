@@ -213,10 +213,11 @@ fun EmptyBox(title: String, sub: String, modifier: Modifier = Modifier) {
 @OptIn(UnstableApi::class)
 @Composable
 fun FavButton(item: Saved) {
-    val store = streamContainer().streamStore
+    val c = streamContainer()
+    val store = c.streamStore
     val data by store.data.collectAsState()
     val on = data.favs.any { it.key == item.key }
-    IconButton(onClick = { store.toggleFav(item); streamContainer().emitMessage(if (on) "Dihapus dari koleksi" else "Disimpan ke koleksi") }) {
+    IconButton(onClick = { store.toggleFav(item); c.emitMessage(if (on) "Dihapus dari koleksi" else "Disimpan ke koleksi") }) {
         Icon(if (on) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder, "Simpan", tint = if (on) Freease.accent.primary else MaterialTheme.colorScheme.onBackground)
     }
 }

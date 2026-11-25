@@ -119,6 +119,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.navigation.compose)
+    // Freease Stream: baca teks komik di HP untuk diterjemahkan (model Latin ikut di APK, tanpa Google Play).
+    implementation(libs.mlkit.text)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

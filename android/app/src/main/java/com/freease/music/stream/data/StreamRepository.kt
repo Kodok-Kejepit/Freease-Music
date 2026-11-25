@@ -13,6 +13,7 @@ class StreamRepository(base: OkHttpClient) {
     val od = Otakudesu(http, resolvers)
     val ac = Anichin(http, resolvers)
     private val cache = TtlCache(400)
+    val translator by lazy { PageTranslator(http) }
 
     val mangaSources: List<MangaSource> = listOf(
         Komiku(http), Shinigami(http),

@@ -108,7 +108,8 @@ fun StreamHomeScreen(initialTab: String) {
 @Composable
 private fun ContinueShelf(tab: String) {
     val actions = LocalActions.current
-    val data by streamContainer().streamStore.data.collectAsState()
+    val store = streamContainer().streamStore
+    val data by store.data.collectAsState()
     val items = data.recent.filter { if (tab == "komik") it.kind == "manga" else it.kind == "anime" }.take(16)
     Shelf("Lanjutkan", items, onMore = { actions.navigate(StreamRoutes.LIBRARY) }, key = { it.key }) { s ->
         Box {
@@ -123,7 +124,7 @@ private fun ContinueShelf(tab: String) {
                     }
                 },
             )
-            IconButton(onClick = { streamContainer().streamStore.forget(s.kind, s.id) }, modifier = Modifier.align(Alignment.TopEnd).size(30.dp)) {
+            IconButton(onClick = { store.forget(s.kind, s.id) }, modifier = Modifier.align(Alignment.TopEnd).size(30.dp)) {
                 Icon(Icons.Rounded.Close, "Hapus dari Lanjutkan", tint = Color.White, modifier = Modifier.size(16.dp).clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = 0.6f)))
             }
         }
@@ -260,8 +261,8 @@ private fun BrowseButton(label: String, onClick: () -> Unit) {
 }
 
 /** Tanggal ISO dari Animekompi → "3 jam lalu". */
-fun timeAgoIso(iso: String?): String? = iso?.let {
-    runCatching { java.time.OffsetDateTime.parse(it).toInstant().toEpochMilli() }.recoverCatching { java.time.Instant.parse(it).toEpochMilli() }
-        .recoverCatching { java.time.LocalDateTime.parse(it.replace(' ', 'T')).atZone(java.time.ZoneId.of("Asia/Jakarta")).toInstant().toEpochMilli() }
+fun timeAgoIso(iso: String?): String? = iso?.let { t ->
+    runCatching { java.time.OffsetDateTime.parse(t).toInstant().toEpochMilli() }.recoverCatching { java.time.Instant.parse(t).toEpochMilli() }
+        .recoverCatching { java.time.LocalDateTime.parse(t.replace(' ', 'T')).atZone(java.time.ZoneId.of("Asia/Jakarta")).toInstant().toEpochMilli() }
         .getOrNull()?.let(::timeAgo)?.ifEmpty { null }
 }

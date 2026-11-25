@@ -26,9 +26,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.LibraryMusic
+import androidx.compose.material.icons.outlined.LiveTv
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LibraryMusic
+import androidx.compose.material.icons.rounded.LiveTv
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -92,12 +94,14 @@ import com.freease.music.ui.screens.SettingsScreen
 import com.freease.music.ui.screens.StatsScreen
 import com.freease.music.ui.theme.Freease
 import com.freease.music.ui.theme.FreeaseTheme
+import com.freease.music.stream.ui.streamGraph
 
 private data class Tab(val route: String, val label: String, val icon: ImageVector, val selectedIcon: ImageVector)
 
 private val tabs = listOf(
     Tab(Routes.HOME, "Beranda", Icons.Outlined.Home, Icons.Rounded.Home),
     Tab(Routes.SEARCH, "Cari", Icons.Outlined.Search, Icons.Rounded.Search),
+    Tab(com.freease.music.stream.ui.StreamRoutes.HOME, "Stream", Icons.Outlined.LiveTv, Icons.Rounded.LiveTv),
     Tab(Routes.LIBRARY, "Koleksi", Icons.Outlined.LibraryMusic, Icons.Rounded.LibraryMusic),
 )
 
@@ -164,6 +168,7 @@ fun FreeaseRoot(container: AppContainer, onActionsReady: (AppActions) -> Unit) {
                     composable(Routes.LOCAL, arguments = listOf(navArgument("id") { type = NavType.LongType })) {
                         LocalPlaylistScreen(it.arguments?.getLong("id") ?: 0)
                     }
+                    streamGraph()
                     composable(
                         Routes.CATEGORY,
                         arguments = listOf(
@@ -177,13 +182,15 @@ fun FreeaseRoot(container: AppContainer, onActionsReady: (AppActions) -> Unit) {
 
                 val route = nav.currentBackStackEntryAsState().value?.destination?.route
                 // Mode Mobil memakai seluruh layar (tanpa mini player & navigasi bawah).
-                if (route != Routes.CAR && route != Routes.WRAPPED) Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
+                // Mode Mobil, layar tonton, dan pembaca komik memakai seluruh layar.
+                val fullScreen = route == Routes.CAR || route == Routes.WRAPPED || route == com.freease.music.stream.ui.StreamRoutes.WATCH || route == com.freease.music.stream.ui.StreamRoutes.READ
+                if (!fullScreen) Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
                     AnimatedVisibility(hasSong, enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut()) {
                         MiniPlayer(Modifier.padding(bottom = 4.dp))
                     }
                     BottomBar(route) { route ->
                         if (route == Routes.HOME) nav.popBackStack(Routes.HOME, inclusive = false)
-                        else nav.navigate(route) {
+                        else nav.navigate(if (route == com.freease.music.stream.ui.StreamRoutes.HOME) com.freease.music.stream.ui.StreamRoutes.home() else route) {
                             popUpTo(Routes.HOME) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
