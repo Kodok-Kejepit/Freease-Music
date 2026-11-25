@@ -327,6 +327,7 @@ private fun ReaderPage(p: Img, i: Int, translate: Boolean, fit: Boolean) {
         busy = false
     }
     BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val maxW = constraints.maxWidth.toFloat()
         var ratio by remember(p) { mutableStateOf(0f) }
         Box(if (fit) Modifier.fillMaxSize() else Modifier.fillMaxWidth()) {
             SubcomposeAsyncImage(
@@ -338,7 +339,7 @@ private fun ReaderPage(p: Img, i: Int, translate: Boolean, fit: Boolean) {
             )
             val b = bubbles
             if (!fit && translate && b != null && !showOriginal && ratio > 0f) {
-                val wPx = constraints.maxWidth.toFloat()
+                val wPx = maxW
                 val hPx = wPx / ratio
                 val density = LocalDensity.current
                 b.forEach { bb ->

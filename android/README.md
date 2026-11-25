@@ -73,6 +73,22 @@ Di bawah ini daftar fitur yang sudah ada sejauh ini.
 - Riwayat, statistik jam dan hari favorit, Rekap Kamu, dan Freease Wrapped tahunan yang bisa dibagikan
 - Cadangan koleksi, termasuk cadangan otomatis mingguan. Formatnya sama dengan Freease Web
 
+## Freease Stream
+
+Tab **Stream** isinya anime, donghua, dan komik. Semuanya diambil langsung dari HP kamu, tanpa server perantara.
+
+- Anime subtitle Indonesia dari Animekompi dan Otakudesu, donghua dari Anichin, banyak yang sampai 1080p
+- Episode terbaru, jelajah per sumber, genre, dan status, jadwal rilis dalam WIB, plus cari anime dan komik sekaligus
+- Pemutar sendiri: pilih server dan kualitas, pindah server otomatis kalau gagal, lanjut dari menit terakhir, episode
+  berikutnya otomatis, dan layar penuh
+- Server yang cuma bisa diputar lewat pemutar situs lain dipakai paling akhir, di dalam pembatas yang memblokir
+  jendela iklan, pindah halaman, unduhan, dan domain iklan yang dikenal
+- Komik dari Komiku, Shinigami, Komikindo, Bacakomik, WEBTOON, MangaPark, dan MangaGoku, dengan mode gulir dan
+  per halaman. Halaman terakhir diingat
+- Terjemahan komik ke bahasa Indonesia langsung di atas balon kata. Teksnya dibaca di HP, jadi gratis dan tanpa
+  batas. Paling bagus untuk komik bahasa Inggris
+- Koleksi dan progres nonton/baca tersimpan di HP
+
 ## Lain-lain
 
 - Tema gelap dengan 6 warna aksen dan mode AMOLED. Warna pemutar mengikuti sampul lagu
@@ -104,6 +120,7 @@ app/src/main/java/com/freease/music/
 │                crossfade, timer tidur, lirik melayang, Canvas
 ├── assistant/   Freease Smart: pemahaman perintah, pengenal suara, dan suara jawaban
 ├── karaoke/     pemisahan vokal (STFT dan MDX-Net) dan pemutarannya
+├── stream/      Freease Stream: sumber anime, donghua, dan komik, terjemahan komik, dan layarnya
 └── ui/          tema, komponen, semua layar, dan pemutar
 ```
 
