@@ -15,8 +15,8 @@ android {
         applicationId = "com.freease.music"
         minSdk = 26
         targetSdk = 35
-        versionCode = 20
-        versionName = "2.0.0"
+        versionCode = 21
+        versionName = "2.1.0"
         vectorDrawables.useSupportLibrary = true
         // Hanya sertakan resource bahasa yang dipakai (library AndroidX/Material membawa puluhan bahasa).
         androidResources.localeFilters += setOf("en", "id")
@@ -71,6 +71,12 @@ android {
                 test.systemProperty("robolectric.offline", "true")
                 test.systemProperty("robolectric.dependency.dir", it)
             }
+            // Uji Stream yang butuh internet hanya dimuat bila diminta (-PstreamLive).
+            if (project.hasProperty("streamLive")) {
+                test.systemProperty("stream.live", "true")
+                test.systemProperty("roborazzi.test.record", "true")
+            }
+            else test.exclude("**/StreamLiveProbe*", "**/StreamScreenshotTest*")
             project.findProperty("recognize.pcm")?.let { test.systemProperty("recognize.pcm", it) }
             project.findProperty("karaoke.pcm")?.let { test.systemProperty("karaoke.pcm", it) }
             project.findProperty("karaoke.mix")?.let { test.systemProperty("karaoke.mix", it) }
@@ -119,6 +125,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.navigation.compose)
+    // Freease Stream: baca teks komik di HP untuk diterjemahkan (model Latin ikut di APK, tanpa Google Play).
+    implementation(libs.mlkit.text)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

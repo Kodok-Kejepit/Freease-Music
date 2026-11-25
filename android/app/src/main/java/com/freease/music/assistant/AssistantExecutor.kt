@@ -241,6 +241,11 @@ class AssistantExecutor(private val actions: AppActions) {
             Page.RECOGNIZE -> actions.navigate(Routes.recognize(auto = false))
             Page.IMPORT -> actions.navigate(Routes.import())
             Page.VOICE_PACK -> actions.navigate(Routes.VOICE_PACK)
+            Page.STREAM -> actions.navigate(com.freease.music.stream.ui.StreamRoutes.home())
+            Page.ANIME -> actions.navigate(com.freease.music.stream.ui.StreamRoutes.home("anime"))
+            Page.DONGHUA -> actions.navigate(com.freease.music.stream.ui.StreamRoutes.home("donghua"))
+            Page.KOMIK -> actions.navigate(com.freease.music.stream.ui.StreamRoutes.home("komik"))
+            Page.STREAM_SCHEDULE -> actions.navigate(com.freease.music.stream.ui.StreamRoutes.schedule())
             Page.PLAYER, Page.QUEUE -> {
                 if (actions.player.state.value.song == null) return nothing()
                 actions.showLyrics = false

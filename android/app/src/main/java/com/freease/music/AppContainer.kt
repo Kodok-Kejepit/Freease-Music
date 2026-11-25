@@ -85,6 +85,10 @@ class AppContainer(private val context: Context) {
     val smart: com.freease.music.playback.smart.SmartEngine by lazy {
         com.freease.music.playback.smart.SmartEngine(library, youtube, tasteDb.dao(), appScope)
     }
+    /** Freease Stream: anime, donghua, dan komik langsung dari sumbernya (HP yang meminta, tanpa server perantara). */
+    val stream by lazy { com.freease.music.stream.data.StreamRepository(httpClient) }
+    val streamStore by lazy { com.freease.music.stream.data.StreamStore(File(context.filesDir, "stream.json"), appScope) }
+
     val sleepTimer = SleepTimer()
     val effects = AudioEffectsController(context)
     val eqProfiles = com.freease.music.playback.EqProfiles(context, settings, appScope) { emitMessage("Equalizer: profil ${it.label}") }
