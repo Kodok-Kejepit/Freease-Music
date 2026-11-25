@@ -14,7 +14,9 @@ const SLUG = /^[a-z0-9][a-z0-9._-]{0,200}$/i;
 const abs = (u) => (!u ? null : u.startsWith('http') ? u : BASE + (u.startsWith('/') ? u : '/' + u));
 const img = (u) => imgUrl(abs(u ? htmlLine(u) : null), BASE + '/');
 const slugOf = (u) => String(u ?? '').replace(/^https?:\/\/[^/]+/, '').match(/^\/(?:anime\/)?([^/?#"]+)\/?$/)?.[1] ?? null;
-const epNum = (t) => String(t ?? '').match(/Episode\s+(\d+(?:\.\d+)?)/i)?.[1] ?? '';
+// "Season 2 Episode 98 [124]": nomor dalam kurung = nomor total seri, supaya tidak bentrok dengan musim pertama.
+const epNum = (t) => { const m = String(t ?? '').match(/Episode\s+(\d+(?:\.\d+)?)(?:\s*\[(\d+(?:\.\d+)?)\])?/i); return m?.[2] ?? m?.[1] ?? ''; };
+const numText = (t) => { const s = htmlLine(t); return s.match(/\[(\d+(?:\.\d+)?)\]/)?.[1] ?? s.match(/^\d+(?:\.\d+)?/)?.[0] ?? s; };
 const stripEp = (t) => htmlLine(t).replace(/\s+Episode\s+\d+(?:\.\d+)?.*$/i, '').replace(/\s+Subtitle Indonesia$/i, '').trim();
 const status = (s) => (/ongoing/i.test(s ?? '') ? 'Ongoing' : /complete|tamat/i.test(s ?? '') ? 'Tamat' : /hiatus/i.test(s ?? '') ? 'Hiatus' : null);
 
@@ -120,7 +122,7 @@ export async function detail(id) {
   const eps = [...(html.match(/class="eplister"[\s\S]*?<\/ul>/)?.[0] ?? '').matchAll(/<a href="([^"]+)">([\s\S]*?)<\/a>/g)].map((m) => {
     const ep = slugOf(m[1]);
     return ep && /-episode-\d/.test(ep) ? {
-      id: PREFIX + ep, number: htmlLine(m[2].match(/class="epl-num">([^<]*)/)?.[1]) || epNum(ep.replace(/-/g, ' ')),
+      id: PREFIX + ep, number: numText(m[2].match(/class="epl-num">([^<]*)/)?.[1]) || epNum(htmlLine(m[2].match(/class="epl-title">([^<]*)/)?.[1])) || epNum(ep.replace(/-/g, ' ')),
       title: htmlLine(m[2].match(/class="epl-title">([^<]*)/)?.[1]) || `Episode ${epNum(ep.replace(/-/g, ' '))}`,
       at: htmlLine(m[2].match(/class="epl-date">([^<]*)/)?.[1]) || null, views: null,
     } : null;
@@ -177,7 +179,7 @@ export async function episode(id, resolve) {
   const num = (s) => list.find((e) => e.id === PREFIX + s)?.number || epNum(String(s).replace(/-/g, ' '));
   return {
     id: PREFIX + slug,
-    number: html.match(/itemprop="episodeNumber" content="([^"]+)"/)?.[1] ?? epNum(title),
+    number: epNum(title) || html.match(/itemprop="episodeNumber" content="([^"]+)"/)?.[1] || '',
     title: title.replace(/\s*Subtitle Indonesia\s*$/i, ''),
     anime,
     prev: prev ? { id: PREFIX + prev, number: num(prev) } : null,

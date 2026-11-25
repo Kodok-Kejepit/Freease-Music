@@ -3,6 +3,7 @@
 import { fetchText, decodeEntities, htmlLine, htmlText, SourceError, ttlCache, UA_DESKTOP } from './net.js';
 import { mediaUrl } from './media.js';
 import { embedSource, sortSources } from './embed.js';
+import { resolveHls } from './hosts.js';
 
 // Domain Otakudesu sering berganti; tautan dibaca tanpa memedulikan host-nya.
 const BASE = (process.env.FS_OTAKUDESU_URL || 'https://otakudesu.blog').replace(/\/+$/, '');
@@ -173,7 +174,8 @@ async function resolveEmbed(url, quality, label, blogger) {
     const file = data.match(/"url":"(https:\/\/[^"]+\.(?:mp4|mkv|webm)\?[^"]+)"/)?.[1] ?? data.match(/"url":"(https:\/\/[^"]+\.mp4)"/)?.[1];
     return file ? [{ label, quality, type: 'mp4', url: mediaUrl(file.replace(/\\u0026/g, '&')) }] : [];
   }
-  return embedSource(url, quality);
+  const hls = await resolveHls(url, label, quality, BASE + '/').catch(() => []);
+  return hls.length ? hls : embedSource(url, quality);
 }
 
 const ajax = async (body) => {
@@ -186,7 +188,7 @@ const ajax = async (body) => {
 };
 
 const streamCache = ttlCache(200);
-const WANT = /^(odcdn|ondesu|odstream|desu|blogs?|filedon|pdrain|mega)/i;
+const WANT = /^(odcdn|ondesu|odstream|desu|blogs?|filedon|pdrain|mega|vidhide)/i;
 
 export async function episode(id, blogger) {
   const slug = check(id);
@@ -225,7 +227,7 @@ export async function episode(id, blogger) {
             try { d = JSON.parse(Buffer.from(m.content, 'base64').toString()); } catch { return []; }
             const enc = await ajax({ ...d, nonce, action: embedAct });
             const src = Buffer.from(String(enc ?? ''), 'base64').toString().match(/src="([^"]+)"/)?.[1];
-            const label = /mega/i.test(m.name) ? 'MEGA' : /cdn/i.test(m.name) ? 'ODCDN' : /desu|stream/i.test(m.name) ? 'Desustream' : /blog/i.test(m.name) ? 'Blogger' : /filedon/i.test(m.name) ? 'Filedon' : m.name;
+            const label = /mega/i.test(m.name) ? 'MEGA' : /cdn/i.test(m.name) ? 'ODCDN' : /desu|stream/i.test(m.name) ? 'Desustream' : /blog/i.test(m.name) ? 'Blogger' : /vidhide/i.test(m.name) ? 'VidHide' : /filedon/i.test(m.name) ? 'Filedon' : m.name;
             return src ? resolveEmbed(decodeEntities(src), m.quality, label, blogger) : [];
           })().catch(() => []));
         }

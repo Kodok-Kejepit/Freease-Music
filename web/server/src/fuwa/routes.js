@@ -39,6 +39,10 @@ export function mountStream(app) {
   app.get('/api/fs/anime/:id', wrap(300, (req) => A.detail(req.params.id)));
   // Tautan video kedaluwarsa dalam ±1 jam: jangan disimpan browser lama-lama.
   app.get('/api/fs/episode/:id', wrap(60, (req) => A.episode(req.params.id)));
+  app.get('/api/fs/episode-elsewhere', wrap(60, (req) => {
+    const alts = Array.isArray(req.query.alt) ? req.query.alt : req.query.alt ? [req.query.alt] : [];
+    return A.episodeElsewhere(str(req.query.id, 220), str(req.query.title, 200), alts.map((a) => str(a, 200)).slice(0, 3), str(req.query.n, 20));
+  }));
 
   app.get('/api/fs/manga/home', wrap(600, () => M.home()));
   app.get('/api/fs/manga/sources', wrap(86400, () => M.SOURCE_LIST));

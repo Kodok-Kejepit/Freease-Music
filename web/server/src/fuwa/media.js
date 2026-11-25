@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import { Readable } from 'node:stream';
 import { UA_DESKTOP } from './net.js';
 
+const LANG = 'id-ID,id;q=0.9,en;q=0.8';
 const KEY = process.env.FREEASE_SECRET || crypto.randomBytes(32).toString('hex');
 const b64 = (s) => Buffer.from(s).toString('base64url');
 const unb64 = (s) => Buffer.from(String(s), 'base64url').toString();
@@ -13,6 +14,10 @@ const sign = (...parts) => crypto.createHmac('sha256', KEY).update(parts.join('\
 /** URL lokal untuk video [url] (dengan Referer opsional). */
 export function mediaUrl(url, referer = '') {
   return `/api/fs/media?u=${b64(url)}${referer ? `&r=${b64(referer)}` : ''}&s=${sign('m', url, referer)}`;
+}
+/** URL lokal untuk daftar putar HLS [url]: isinya ditulis ulang supaya tiap potongan juga lewat proxy ini. */
+export function hlsUrl(url, referer = '') {
+  return `/api/fs/hls?u=${b64(url)}${referer ? `&r=${b64(referer)}` : ''}&s=${sign('h', url, referer)}`;
 }
 /** URL lokal untuk gambar [url]; tanpa tanda tangan bila kosong. */
 export function imgUrl(url, referer = '') {
@@ -37,7 +42,8 @@ const PASS = ['content-type', 'content-length', 'content-range', 'accept-ranges'
 async function pipe(req, res, target, { image }) {
   const ac = new AbortController();
   res.on('close', () => ac.abort());
-  const headers = { 'user-agent': UA_DESKTOP, accept: image ? 'image/avif,image/webp,image/*,*/*;q=0.8' : '*/*' };
+  // Header sama dengan saat halaman pemutar dibuka (fetchText): beberapa token CDN terikat ke sidik header ini.
+  const headers = { 'user-agent': UA_DESKTOP, 'accept-language': LANG, accept: image ? 'image/avif,image/webp,image/*,*/*;q=0.8' : '*/*' };
   if (target.referer) headers.referer = target.referer;
   if (!image && req.headers.range) headers.range = req.headers.range;
   let up;
@@ -59,12 +65,42 @@ async function pipe(req, res, target, { image }) {
   Readable.fromWeb(up.body).on('error', () => res.destroy()).pipe(res);
 }
 
+/** Daftar putar m3u8: URI di dalamnya (varian, potongan, kunci, peta) diganti URL proxy bertanda tangan. */
+async function playlist(req, res, t) {
+  let up;
+  try {
+    up = await fetch(t.url, { headers: { 'user-agent': UA_DESKTOP, 'accept-language': LANG, ...(t.referer ? { referer: t.referer, origin: t.referer.replace(/\/$/, '') } : {}) }, redirect: 'follow', signal: AbortSignal.timeout(15000) });
+  } catch { return res.status(502).end(); }
+  const text = up.ok ? await up.text() : '';
+  if (!text.trimStart().startsWith('#EXTM3U')) return res.status(up.status === 404 ? 404 : 502).end();
+  const base = up.url || t.url;
+  const abs = (u) => { try { return new URL(u, base).href; } catch { return u; } };
+  const master = /#EXT-X-STREAM-INF/.test(text);
+  const out = text.split(/\r?\n/).map((line) => {
+    const l = line.trim();
+    if (!l) return l;
+    if (l.startsWith('#')) {
+      const sub = /^#EXT-X-(MEDIA|I-FRAME-STREAM-INF)/.test(l);
+      return l.replace(/URI="([^"]+)"/g, (_, u) => `URI="${sub ? hlsUrl(abs(u), t.referer) : mediaUrl(abs(u), t.referer)}"`);
+    }
+    return master ? hlsUrl(abs(l), t.referer) : mediaUrl(abs(l), t.referer);
+  }).join('\n');
+  res.setHeader('content-type', 'application/vnd.apple.mpegurl');
+  res.setHeader('cache-control', 'private, max-age=60');
+  res.send(out);
+}
+
 /** Pasang rute proxy ke aplikasi Express. */
 export function mountMedia(app) {
   app.get('/api/fs/media', (req, res) => {
     const t = verify('m', req.query);
     if (!t) return res.status(403).json({ error: 'Tautan video tidak sah atau kedaluwarsa' });
     pipe(req, res, t, { image: false });
+  });
+  app.get('/api/fs/hls', (req, res) => {
+    const t = verify('h', req.query);
+    if (!t) return res.status(403).json({ error: 'Tautan video tidak sah atau kedaluwarsa' });
+    playlist(req, res, t);
   });
   app.get('/api/fs/img', (req, res) => {
     const t = verify('i', req.query);

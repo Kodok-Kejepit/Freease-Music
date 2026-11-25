@@ -5,6 +5,7 @@ import { mediaUrl } from './media.js';
 import * as OD from './otakudesu.js';
 import * as AC from './anichin.js';
 import { embedSource, sortSources } from './embed.js';
+import { resolveHls } from './hosts.js';
 
 /** Sumber anime yang tersedia (ID tanpa awalan = Animekompi). */
 export const SOURCES = [{ key: 'ak', name: 'Animekompi' }, { key: 'od', name: OD.NAME }, { key: 'ac', name: AC.NAME, donghua: true }];
@@ -183,7 +184,10 @@ async function resolveSource(src) {
   if (host === 'ok.ru' || host === 'm.ok.ru') return okru(url, label);
   if (/mp4upload\.com$/.test(host)) return mp4upload(url, label);
   if (src.kind === 'direct' && /\.(mp4|webm)(\?|$)/i.test(url)) return [{ label, quality: qualityOf(src.quality, label, url), type: 'mp4', url: mediaUrl(url) }];
-  return embedSource(url, qualityOf(src.quality, label, url));
+  const q = qualityOf(src.quality, label, url);
+  // Pemutar berisi iklan (VidHide, Streamruby, Mecdn, Vidara, Dailymotion, …): daftar putarnya dibuka jadi HLS.
+  const hls = await resolveHls(url, label, q).catch(() => []);
+  return hls.length ? hls : embedSource(url, q);
 }
 
 const ITAG = { 17: 144, 18: 360, 22: 720, 34: 360, 35: 480, 36: 240, 37: 1080, 43: 360, 59: 480, 78: 480 };
@@ -207,8 +211,14 @@ const OK_NAMES = { full: 1080, hd: 720, sd: 480, low: 360, lowest: 240, mobile: 
 async function okru(url, label) {
   const id = url.match(/(?:videoembed|video)\/(\d+)/)?.[1];
   if (!id) return [];
-  const { text } = await fetchText(`https://ok.ru/videoembed/${id}`, { ua: UA_DESKTOP, timeout: 12000 });
-  const raw = text.match(/data-options="([^"]+)"/)?.[1];
+  // OK.ru kadang menolak sesaat saat banyak permintaan beruntun: coba sekali lagi sebelum dianggap kosong.
+  let raw;
+  for (let i = 0; i < 2 && !raw; i++) {
+    if (i) await new Promise((r) => setTimeout(r, 1500));
+    const { text } = await fetchText(`https://ok.ru/videoembed/${id}`, { ua: UA_DESKTOP, timeout: 12000 });
+    raw = text.match(/data-options="([^"]+)"/)?.[1];
+    if (/vp_video_stub_txt/.test(text)) break;
+  }
   if (!raw) return [];
   let md;
   try {
@@ -265,4 +275,23 @@ export async function episode(epSlug) {
     downloads: (j.downloads ?? []).filter((d) => /^https?:/.test(d.url || '')).map((d) => ({ label: d.label, resolution: d.resolution ?? null, url: d.url })),
     episodes: list,
   };
+}
+
+/**
+ * Episode bernomor sama dari judul yang sama di sumber lain, beserta server videonya — dipakai pemutar saat server
+ * di sumber sekarang kosong atau semuanya gagal, supaya episode tetap bisa ditonton tanpa pindah halaman.
+ */
+export async function episodeElsewhere(id, title, alts, number) {
+  const n = Number(String(number ?? '').match(/\d+(?:\.\d+)?/)?.[0]);
+  if (!Number.isFinite(n)) return [];
+  const others = (await alternatives(id, title, alts)).slice(0, 4);
+  const found = await Promise.all(others.map(async (a) => {
+    const det = await quiet(detail(a.id), 15000, null);
+    const ep = det?.episodes?.find((e) => Number(e.number) === n);
+    if (!ep) return null;
+    const e = await quiet(episode(ep.id), 30000, null);
+    if (!e?.sources?.length) return null;
+    return { source: a.source ?? 'Sumber lain', animeId: a.id, episodeId: ep.id, sources: e.sources };
+  }));
+  return found.filter(Boolean);
 }

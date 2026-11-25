@@ -22,8 +22,10 @@ export interface ReleaseItem extends Anime { episode: string; date: string | nul
 export interface LatestEpisode extends Anime { episode: string; episodeId: string; at: string | null }
 export interface EpisodeRef { id: string; number: string; title: string; at?: string | null; views?: number | null }
 export interface AnimeDetail extends Anime { altTitles: string | null; episodes: EpisodeRef[]; batch: { label: string; url: string; resolution: string | null }[] }
-/** `mp4` diputar pemutar Freease sendiri; `embed` = pemutar situs lain di iframe ber-sandbox (cadangan). */
-export interface VideoSource { label: string; quality: string; type: 'mp4' | 'embed'; url: string; fallback?: string }
+/** `mp4`/`hls` diputar pemutar Freease sendiri; `embed` = pemutar situs lain di iframe ber-sandbox (cadangan). */
+export interface VideoSource { label: string; quality: string; type: 'mp4' | 'hls' | 'embed'; url: string; fallback?: string; from?: string }
+/** Episode bernomor sama di sumber lain, beserta server videonya. */
+export interface EpisodeElsewhere { source: string; animeId: string; episodeId: string; sources: VideoSource[] }
 export interface EpisodeData {
   id: string; number: string; title: string; anime: Anime | null;
   prev: { id: string; number: string } | null; next: { id: string; number: string } | null;
@@ -60,6 +62,8 @@ export const fs = {
   schedule: (kind?: 'donghua', s?: AbortSignal) => get<ScheduleDay[]>(`/api/fs/anime/schedule${kind ? `?kind=${kind}` : ''}`, s),
   anime: (id: string, s?: AbortSignal) => get<AnimeDetail>(`/api/fs/anime/${q(id)}`, s),
   episode: (id: string, s?: AbortSignal) => get<EpisodeData>(`/api/fs/episode/${q(id)}`, s),
+  episodeElsewhere: (a: { id: string; title: string; altTitles?: string | null }, n: string, s?: AbortSignal) =>
+    get<EpisodeElsewhere[]>(`/api/fs/episode-elsewhere?id=${q(a.id)}&title=${q(a.title)}&n=${q(n)}${a.altTitles ? `&alt=${q(a.altTitles.split(/[,;]/)[0].trim())}` : ''}`, s),
   search: (term: string, s?: AbortSignal) => get<{ anime: Anime[]; manga: Manga[] }>(`/api/fs/search?q=${q(term)}`, s),
   animeSearch: (term: string, s?: AbortSignal) => get<Anime[]>(`/api/fs/anime/search?q=${q(term)}`, s),
 
