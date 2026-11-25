@@ -41,8 +41,16 @@ jobs:
         continue-on-error: true
         working-directory: android
         run: |
-          ./gradlew --no-daemon testDebugUnitTest -PstreamLive --tests '*StreamLiveProbe*'
+          ./gradlew --no-daemon testDebugUnitTest -PstreamLive --tests '*StreamLiveProbe*' --tests '*StreamScreenshotTest*' || true
           cat app/build/reports/stream-live.txt | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: layar-stream
+          path: android/app/build/shots-stream/
+          retention-days: 7
+          if-no-files-found: ignore
 
       - uses: actions/upload-artifact@v4
         if: always()

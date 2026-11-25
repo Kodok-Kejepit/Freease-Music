@@ -21,8 +21,8 @@ Lagunya diambil dari YouTube dan YouTube Music, tapi diputar langsung dari berka
 pernah ikut. Nggak perlu akun, nggak ada langganan, dan semua koleksi kamu tersimpan di HP kamu sendiri.
 
 Lama-lama fiturnya nambah terus: lirik yang jalan sesuai lagu, mode karaoke, asisten suara yang ngerti bahasa
-Indonesia, sampai bisa nonton video YouTube apa aja tanpa iklan. Versi webnya sekarang juga punya **Freease Stream**
-buat nonton anime dan donghua subtitle Indonesia, sama baca manga, manhwa, dan manhua.
+Indonesia, sampai bisa nonton video YouTube apa aja tanpa iklan. Sekarang ada juga **Freease Stream**, di aplikasi
+dan di web, buat nonton anime dan donghua subtitle Indonesia, sama baca manga, manhwa, dan manhua.
 
 ## Yang bisa dilakukan
 
@@ -41,6 +41,11 @@ buat nonton anime dan donghua subtitle Indonesia, sama baca manga, manhwa, dan m
 **Video**
 - Ganti dari mode lagu ke video kapan aja, kualitas sampai 1080p, tanpa iklan
 - Layar penuh dan Picture-in-Picture
+
+**Freease Stream**
+- Anime subtitle Indonesia dari Animekompi dan Otakudesu, donghua dari Anichin, banyak yang sampai 1080p
+- Baca manga, manhwa, dan manhua dari tujuh sumber, plus terjemahan bahasa Indonesia langsung di atas balon kata
+- Jadwal rilis, lanjut dari menit terakhir, dan "Oke Freease, buka donghua" juga bisa
 
 **Lainnya**
 - Freease Smart: bilang "oke Freease, putar Tulus" dan langsung jalan
