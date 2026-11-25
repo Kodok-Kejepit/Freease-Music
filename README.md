@@ -21,7 +21,8 @@ Lagunya diambil dari YouTube dan YouTube Music, tapi diputar langsung dari berka
 pernah ikut. Nggak perlu akun, nggak ada langganan, dan semua koleksi kamu tersimpan di HP kamu sendiri.
 
 Lama-lama fiturnya nambah terus: lirik yang jalan sesuai lagu, mode karaoke, asisten suara yang ngerti bahasa
-Indonesia, sampai bisa nonton video YouTube apa aja tanpa iklan.
+Indonesia, sampai bisa nonton video YouTube apa aja tanpa iklan. Versi webnya sekarang juga punya **Freease Stream**
+buat nonton anime dan donghua subtitle Indonesia, sama baca manga, manhwa, dan manhua.
 
 ## Yang bisa dilakukan
 
@@ -70,13 +71,26 @@ Minimal Android 8.0. Versi baru bisa langsung dipasang di atas versi lama, kolek
 ## Versi web
 
 Kalau lagi di laptop atau pakai iPhone, Freease juga bisa dibuka lewat browser di **[freease.cloud](https://freease.cloud)**.
-Di versi web kamu bahkan bisa nonton video YouTube apa aja, dari film sampai kartun.
+Begitu dibuka, kamu tinggal pilih mau ke Freease Musik atau Freease Stream.
 
-<img src="docs/screenshots/web-beranda.webp" alt="Freease di browser" width="100%">
+<img src="docs/screenshots/web-pilihan.webp" alt="Pilih Freease Musik atau Freease Stream" width="100%">
 
-Tampilannya menyesuaikan layar, dari HP sampai monitor lebar. Selain dengerin musik, di versi web kamu bisa pilih
-mau cari di YouTube Music atau YouTube biasa, nonton video dengan subtitle terjemahan Indonesia, dan pasang
-Freease ke layar utama biar kebuka kayak aplikasi (Chrome: menu, lalu Tambahkan ke layar utama).
+**Freease Musik** isinya sama kayak aplikasinya, plus bisa pilih mau cari di YouTube Music atau YouTube biasa,
+dan nonton video apa aja dengan subtitle terjemahan Indonesia.
+
+<img src="docs/screenshots/web-beranda.webp" alt="Freease Musik di browser" width="100%">
+
+**Freease Stream** itu tempat nonton dan baca:
+- Anime subtitle Indonesia dari Animekompi dan Otakudesu, episode baru biasanya udah ada di hari yang sama
+- Donghua dari Anichin, banyak yang sampai 1080p
+- Manga, manhwa, dan manhua dari tujuh sumber, ada mode webtoon dan mode per halaman
+- Komik bahasa lain bisa langsung diterjemahin ke bahasa Indonesia di atas balon katanya
+- Jadwal rilis, lanjut dari menit terakhir, episode berikutnya otomatis, dan pindah sumber kalau servernya kosong
+
+<img src="docs/screenshots/web-donghua.webp" alt="Donghua di Freease Stream" width="100%">
+
+Tampilannya menyesuaikan layar, dari HP sampai monitor lebar, dan bisa dipasang ke layar utama biar kebuka kayak
+aplikasi (Chrome: menu, lalu Tambahkan ke layar utama). Kode dan cara pasangnya ada di [web/README.md](web/README.md).
 
 Untuk sekarang versi web masih pakai kata sandi. Kalau mau coba, hubungi aku aja.
 
@@ -94,6 +108,15 @@ APK-nya ada di `app/build/outputs/apk/debug/`. APK rilis di halaman Releases dib
 ([build-apk.yml](.github/workflows/build-apk.yml)). Kalau mau build rilis sendiri, bikin `android/keystore.properties`
 berisi `storeFile`, `storePassword`, `keyAlias`, dan `keyPassword`, lalu jalankan `./gradlew assembleRelease`.
 
+Versi web butuh Node.js 20+ dan yt-dlp:
+
+```bash
+cd Freease-Music/web/client && npm ci && npm run build
+cd ../server && npm ci && npm start    # buka http://localhost:8080
+```
+
+Mau dipasang di VPS sendiri? Ada skripnya, lengkap di [web/README.md](web/README.md).
+
 ## Soal privasi
 
 Freease nggak punya akun dan nggak melacak apa pun. Riwayat, playlist, unduhan, dan pengaturan semuanya disimpan
@@ -103,22 +126,23 @@ SponsorBlock, jadi mereka nggak tahu video apa yang kamu tonton.
 ## Bikin bareng
 
 Nemu bug atau punya ide fitur? Tulis aja di [Issues](https://github.com/Kodok-Kejepit/Freease-Music/issues).
-Pull request juga boleh banget. Sebelum kirim, jalankan dulu `./gradlew testDebugUnitTest` di folder `android`.
+Pull request juga boleh banget. Sebelum kirim, jalankan dulu `./gradlew testDebugUnitTest` di folder `android`,
+atau `npm test` di `web/server` dan `web/client` kalau yang diubah versi web.
 
 ## Tentang aku
 
 <table>
 <tr>
-<td width="110" valign="top"><img src="docs/kodok-kejepit.webp" width="96" alt="Muhamad Surya Widianto"></td>
+<td width="110" valign="top"><img src="docs/kodok-kejepit.webp" width="96" alt="Kodok-Kejepit"></td>
 <td valign="top">
 
-Aku **Muhamad Surya Widianto** ([@Kodok-Kejepit](https://github.com/Kodok-Kejepit)), suka bongkar cara kerja sesuatu terus bikin versi sendiri.
+Aku **[Kodok-Kejepit](https://github.com/Kodok-Kejepit)**, suka bongkar cara kerja sesuatu terus bikin versi sendiri.
 Proyek lain yang juga lagi aku kerjain:
 
 - [JawaRustGo++](https://jrg-lang.org), bahasa pemrograman dengan pesan error berbahasa Indonesia, ditulis pakai Rust ([kode](https://github.com/Kodok-Kejepit/jrg))
 - [Freease OSINT Tool](https://github.com/Kodok-Kejepit/freease), tool recon dan audit keamanan berbasis terminal
 
-Profil lengkap dan perjalanan aku: [jrg-lang.org/profil.html](https://jrg-lang.org/profil.html). Web Freease: [freease.cloud](https://freease.cloud).
+Web Freease: [freease.cloud](https://freease.cloud).
 
 Kalau Freease kepake buat kamu, kasih bintang di repo ini ya. Itu cukup bikin semangat.
 
@@ -128,8 +152,9 @@ Kalau Freease kepake buat kamu, kasih bintang di repo ini ya. Itu cukup bikin se
 
 ## Catatan
 
-Freease proyek pribadi dan nggak ada hubungannya dengan YouTube atau Google. Lagu, video, dan lirik tetap milik
-pemiliknya masing-masing, jadi tetap dukung artis favoritmu.
+Freease proyek pribadi dan nggak ada hubungannya dengan YouTube, Google, atau situs anime dan komik yang jadi
+sumbernya. Lagu, video, anime, komik, dan lirik tetap milik pemiliknya masing-masing, jadi tetap dukung artis dan
+kreator favoritmu.
 
 Dirilis dengan lisensi [MIT](LICENSE).
 
@@ -140,4 +165,4 @@ Dirilis dengan lisensi [MIT](LICENSE).
 
 ## Lisensi
 
-[MIT](LICENSE) © 2026 Muhamad Surya Widianto.
+[MIT](LICENSE) © 2026 Kodok-Kejepit.
