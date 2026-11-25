@@ -544,7 +544,7 @@ export default function Watch() {
           </div>
           <div className="actions wnav">
             <button className="btn" disabled={!ep.prev} onClick={() => ep.prev && nav(routes.watch(ep.prev.id))}><SkipBack size={16} />{ep.prev ? `Ep ${ep.prev.number}` : 'Sebelumnya'}</button>
-            <button className="btn primary" disabled={!ep.next} onClick={() => ep.next && nav(routes.watch(ep.next.id))}>{ep.next ? `Ep ${ep.next.number}` : 'Belum ada lanjutan'}<SkipForward size={16} /></button>
+            <button className="btn primary" disabled={!ep.next} onClick={() => ep.next && nav(routes.watch(ep.next.id))}>{ep.next ? `Ep ${ep.next.number}` : 'Terbaru'}<SkipForward size={16} /></button>
           </div>
           {ep.anime && <AltSources anime={ep.anime} epNumber={ep.number} title="Judul ini juga ada di" />}
           {ep.downloads.length > 0 && (
