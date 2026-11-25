@@ -1,0 +1,51 @@
+# Cek build untuk cabang kerja: APK debug + unit test. Tidak menerbitkan apa pun; APK debug disimpan sebagai
+# artifact selama 7 hari supaya bisa dicoba di HP.
+
+name: Cek build
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [main]
+
+concurrency:
+  group: cek-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Build APK debug
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+
+      - name: Unit test
+        working-directory: android
+        run: ./gradlew --no-daemon testDebugUnitTest
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: freease-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: laporan-tes
+          path: android/app/build/reports/tests/
+          retention-days: 7
