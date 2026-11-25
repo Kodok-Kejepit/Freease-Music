@@ -102,7 +102,7 @@ class Animekompi(private val http: StreamHttp, private val resolvers: Resolvers)
         val ep = j.optJSONObject("episode") ?: throw SourceException("Episode tidak ditemukan")
         val genres = j.optJSONArray("genres").let { g -> (0 until (g?.length() ?: 0)).mapNotNull { i -> (g!!.opt(i) as? JSONObject)?.str("name") ?: g.opt(i) as? String } }
         val sources = coroutineScopeAll(j.optJSONArray("sources").objects()) { s ->
-            resolvers.resolve(s.optString("url"), s.optString("label", "Server"), s.optString("quality"))
+            resolvers.resolve(s.str("url").orEmpty(), s.str("label") ?: "Server", s.str("quality").orEmpty())
         }
         fun ref(o: JSONObject?) = o?.str("slug")?.let { EpisodeRef(it, num(o.opt("number")), "") }
         val n = num(ep.opt("number")).ifEmpty { num(ep.opt("numberLabel")) }

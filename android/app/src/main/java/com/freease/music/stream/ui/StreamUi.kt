@@ -80,7 +80,9 @@ object StreamRoutes {
     const val MANGA = "stream/m/{id}"
     const val READ = "stream/read/{mid}/{cid}"
 
-    fun home(tab: String = "anime") = "stream?tab=$tab"
+    /** Tab yang diminta dibuka (beranda Stream yang sudah terbuka ikut pindah, walau rutenya sama). */
+    val requestedTab = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+    fun home(tab: String = "anime"): String { requestedTab.value = tab; return "stream?tab=$tab" }
     fun browse(src: String = "", order: String = "", status: String = "", genre: String = "") =
         "stream/anime?src=$src&order=$order&status=$status&genre=${Uri.encode(genre)}"
     fun anime(id: String, ep: String = "", play: Boolean = false) = "stream/a/${Uri.encode(id)}?ep=${Uri.encode(ep)}&play=$play"

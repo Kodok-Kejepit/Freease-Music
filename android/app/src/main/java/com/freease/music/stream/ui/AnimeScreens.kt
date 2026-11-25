@@ -298,7 +298,7 @@ fun ScheduleScreen(donghua0: Boolean) {
         when {
             data == null -> item { if (load.error != null) ErrorBox(load.error, retry) else LoadingBox() }
             else -> {
-                val list = data.firstOrNull { it.day == day }?.items.orEmpty().sortedBy { it.time ?: "99" }
+                val list = data.firstOrNull { it.day == day }?.items.orEmpty().sortedBy { it.time?.let(::wibTime)?.takeIf { t -> t != "—" } ?: "99" }
                 if (list.isEmpty()) item { EmptyBox("Tidak ada jadwal", "Belum ada judul yang tercatat rilis hari $day.") }
                 items(list, key = { it.id }) { it ->
                     Row(Modifier.fillMaxWidth().clickable { actions.navigate(StreamRoutes.anime(it.id)) }.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {

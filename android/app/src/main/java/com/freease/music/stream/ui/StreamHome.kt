@@ -61,6 +61,11 @@ fun StreamHomeScreen(initialTab: String) {
     val actions = LocalActions.current
     var tab by rememberSaveable(initialTab) { mutableStateOf(initialTab.takeIf { t -> TABS.any { it.first == t } } ?: "anime") }
     val accent = Freease.accent
+    val requested by StreamRoutes.requestedTab.collectAsState()
+    androidx.compose.runtime.LaunchedEffect(requested) {
+        requested?.takeIf { r -> TABS.any { it.first == r } }?.let { tab = it }
+        StreamRoutes.requestedTab.value = null
+    }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = LocalBottomInset.current + 16.dp)) {
         item {
             Box(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(accent.secondary.copy(alpha = 0.28f), Color.Transparent)))) {

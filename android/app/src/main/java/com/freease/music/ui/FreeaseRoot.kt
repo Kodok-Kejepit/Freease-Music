@@ -190,7 +190,7 @@ fun FreeaseRoot(container: AppContainer, onActionsReady: (AppActions) -> Unit) {
                     }
                     BottomBar(route) { route ->
                         if (route == Routes.HOME) nav.popBackStack(Routes.HOME, inclusive = false)
-                        else nav.navigate(if (route == com.freease.music.stream.ui.StreamRoutes.HOME) com.freease.music.stream.ui.StreamRoutes.home() else route) {
+                        else nav.navigate(if (route == com.freease.music.stream.ui.StreamRoutes.HOME) "stream?tab=" else route) {
                             popUpTo(Routes.HOME) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
