@@ -241,7 +241,11 @@ class MangaPark(private val http: StreamHttp) : MangaSource {
             val it = out[b.groupValues[1]] ?: return@forEach
             if (it.cover == null) Regex("<img[^>]+(?:data-src|src)=\"([^\"]+)\"").first(b.groupValues[2])?.let { c -> out[b.groupValues[1]] = it.copy(cover = img(abs(c), "$base/")) }
         }
-        return out.values.toList()
+        // Kartu bertanda jenis (Manga/Manhwa/Manhua/Novel): novel berisi teks berbayar, bukan komik, jadi dibuang.
+        Regex("<div class=\"unit[^\"]*\">[\\s\\S]*?href=\"/manga/([^\"/?#]+)\"[\\s\\S]*?<span class=\"type\">([^<]+)</span>").findAll(h).forEach { u ->
+            out[u.groupValues[1]]?.let { out[u.groupValues[1]] = it.copy(type = htmlLine(u.groupValues[2])) }
+        }
+        return out.values.filter { !(it.type ?: "").contains("novel", true) && !it.id.endsWith("-novel") }
     }
 
     override suspend fun browse(order: String, page: Int, type: String?) = list(http.text("$base/search?page=$page", mapOf("Referer" to "$base/")))

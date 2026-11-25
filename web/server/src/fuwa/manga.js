@@ -228,7 +228,12 @@ function mpList(h) {
     const img = b[2].match(/<img[^>]+(?:data-src|src)="([^"]+)"/)?.[1];
     if (it && !it.cover && img) it.cover = mpImg(img);
   }
-  return [...out.values()];
+  // Kartu bertanda jenis (Manga/Manhwa/Manhua/Novel): novel berisi teks berbayar, bukan komik, jadi dibuang.
+  for (const u of h.matchAll(/<div class="unit[^"]*">[\s\S]*?href="\/manga\/([^"/?#]+)"[\s\S]*?<span class="type">([^<]+)<\/span>/g)) {
+    const it = out.get(u[1]);
+    if (it) it.type = htmlLine(u[2]);
+  }
+  return [...out.values()].filter((m) => !/novel/i.test(m.type ?? '') && !/-novel$/.test(m.id));
 }
 const mangapark = {
   name: 'MangaPark', lang: 'en',
