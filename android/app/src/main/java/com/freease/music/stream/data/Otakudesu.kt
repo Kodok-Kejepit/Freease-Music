@@ -151,7 +151,8 @@ class Otakudesu(private val http: StreamHttp, private val resolvers: Resolvers) 
                 val label = when {
                     "mega" in m.name.lowercase() -> "MEGA"; "cdn" in m.name.lowercase() -> "ODCDN"
                     Regex("desu|stream", RegexOption.IGNORE_CASE).containsMatchIn(m.name) -> "Desustream"
-                    "blog" in m.name.lowercase() -> "Blogger"; "filedon" in m.name.lowercase() -> "Filedon"; else -> m.name
+                    "blog" in m.name.lowercase() -> "Blogger"; "filedon" in m.name.lowercase() -> "Filedon"
+                    "vidhide" in m.name.lowercase() -> "VidHide"; else -> m.name
                 }
                 if (src != null) resolvers.resolve(decodeEntities(src), label, m.quality) else emptyList()
             }
@@ -177,7 +178,7 @@ class Otakudesu(private val http: StreamHttp, private val resolvers: Resolvers) 
         const val BASE = "https://otakudesu.blog"
         private const val MIN = 60_000L
         private val SLUG = Regex("^[a-z0-9][a-z0-9._-]{0,200}$", RegexOption.IGNORE_CASE)
-        private val WANT = Regex("^(odcdn|ondesu|odstream|desu|blogs?|filedon|pdrain|mega)", RegexOption.IGNORE_CASE)
+        private val WANT = Regex("^(odcdn|ondesu|odstream|desu|blogs?|filedon|pdrain|mega|vidhide)", RegexOption.IGNORE_CASE)
         fun own(id: String) = id.startsWith(PREFIX)
     }
 }

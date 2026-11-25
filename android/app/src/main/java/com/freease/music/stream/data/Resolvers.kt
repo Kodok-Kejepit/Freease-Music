@@ -9,6 +9,7 @@ import java.net.URI
  * Pemutar yang tidak bisa dibuka tapi terbukti aman di sandbox (Abyss, Mecdn, MEGA) dikembalikan sebagai embed.
  */
 class Resolvers(private val http: StreamHttp) {
+    private val hosts = Hosts(http)
 
     suspend fun resolve(url: String, label: String, quality: String = ""): List<VideoSource> {
         val u = url.trim()
@@ -24,7 +25,8 @@ class Resolvers(private val http: StreamHttp) {
                 host.endsWith("desustream.net") -> desustream(u, name, quality)
                 Regex("\\.(mp4|webm)(\\?|$)", RegexOption.IGNORE_CASE).containsMatchIn(u) && host.isNotEmpty() ->
                     listOf(VideoSource(name, qualityOf(quality, name, u), u))
-                else -> embed(u, quality)
+                // Pemutar berisi iklan (VidHide, Streamruby, Mecdn, Vidara, Dailymotion, …): daftar putarnya dibuka jadi HLS.
+                else -> runCatching { hosts.resolve(u, name, qualityOf(quality, name, u)) }.getOrDefault(emptyList()).ifEmpty { embed(u, quality) }
             }
         }.getOrElse { emptyList() }
     }
@@ -52,8 +54,15 @@ class Resolvers(private val http: StreamHttp) {
 
     private suspend fun okru(u: String, label: String): List<VideoSource> {
         val id = Regex("(?:videoembed|video)/(\\d+)").first(u) ?: return emptyList()
-        val html = http.text("https://ok.ru/videoembed/$id")
-        val raw = Regex("data-options=\"([^\"]+)\"").first(html) ?: return emptyList()
+        // OK.ru kadang menolak sesaat saat banyak permintaan beruntun: coba sekali lagi sebelum dianggap kosong.
+        var raw: String? = null
+        for (i in 0 until 2) {
+            if (i > 0) kotlinx.coroutines.delay(1500)
+            val html = http.text("https://ok.ru/videoembed/$id")
+            raw = Regex("data-options=\"([^\"]+)\"").first(html)
+            if (raw != null || "vp_video_stub_txt" in html) break
+        }
+        if (raw == null) return emptyList()
         val o = JSONObject(decodeEntities(raw))
         val fv = o.optJSONObject("flashvars") ?: return emptyList()
         val md = fv.opt("metadata").let { if (it is String) JSONObject(it) else it as? JSONObject } ?: return emptyList()
@@ -120,6 +129,6 @@ class Resolvers(private val http: StreamHttp) {
 
         /** Berkas langsung dulu (pemutar Freease sendiri), embed paling akhir; lalu kualitas tertinggi. */
         fun sort(list: List<VideoSource>): List<VideoSource> =
-            list.distinctBy { it.url }.sortedWith(compareBy<VideoSource> { it.embed }.thenByDescending { it.height })
+            list.distinctBy { it.url }.sortedWith(compareBy<VideoSource> { it.embed }.thenByDescending { it.height }.thenBy { it.hls })
     }
 }

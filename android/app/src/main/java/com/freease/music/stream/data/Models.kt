@@ -28,13 +28,15 @@ data class EpisodeRef(val id: String, val number: String, val title: String, val
 
 data class AnimeDetail(val anime: Anime, val altTitles: String?, val episodes: List<EpisodeRef>)
 
-/** Berkas video yang bisa langsung diputar ExoPlayer, atau pemutar situs lain (embed) sebagai cadangan. */
+/** Berkas video / daftar putar HLS yang bisa langsung diputar ExoPlayer, atau pemutar situs lain (embed) sebagai cadangan. */
 data class VideoSource(
     val label: String,
     val quality: String,
     val url: String,
     val headers: Map<String, String> = emptyMap(),
     val embed: Boolean = false,
+    /** Daftar putar HLS (m3u8), diputar ExoPlayer lewat HlsMediaSource. */
+    val hls: Boolean = false,
 ) {
     val height: Int get() = Regex("(\\d{3,4})").find(quality)?.value?.toIntOrNull() ?: 0
 }

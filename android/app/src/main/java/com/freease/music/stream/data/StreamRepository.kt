@@ -114,6 +114,23 @@ class StreamRepository(base: OkHttpClient) {
         return all.filter { it.id != anime.id && (sameTitle(anime.title, it.title) || (alt != null && sameTitle(alt.split(',', ';').first().trim(), it.title))) }.take(6)
     }
 
+    /**
+     * Episode bernomor sama dari judul yang sama di sumber lain, beserta server videonya (label diawali nama sumber) —
+     * dipakai pemutar saat server di sumber sekarang kosong atau semuanya gagal.
+     */
+    suspend fun episodeElsewhere(anime: Anime, number: String): List<VideoSource> = coroutineScope {
+        val n = Regex("\\d+(?:\\.\\d+)?").find(number)?.value?.toDoubleOrNull() ?: return@coroutineScope emptyList()
+        val others = quiet(15_000, emptyList()) { alternatives(anime, null) }.take(4)
+        others.map { a ->
+            async {
+                quiet(30_000, emptyList()) {
+                    val ep = detail(a.id).episodes.firstOrNull { it.number.toDoubleOrNull() == n } ?: return@quiet emptyList()
+                    episode(ep.id).sources.map { it.copy(label = "${a.source} · ${it.label}") }
+                }
+            }
+        }.flatMap { it.await() }
+    }
+
     // ---------------------------------------------------------------- komik
 
     data class MangaHome(val popular: List<Manga>, val latest: List<Manga>, val manhwa: List<Manga>, val webtoons: List<Manga>, val indo: List<Manga>, val english: List<Manga>)

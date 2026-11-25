@@ -39,6 +39,7 @@ import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -74,6 +75,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.okhttp.OkHttpDataSource
+import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.PlayerView
@@ -166,15 +168,30 @@ private fun Player(ep: EpisodeData, full: Boolean, onFull: (Boolean) -> Unit) {
     val actions = LocalActions.current
     val c = streamContainer()
     val prefs = remember { ctx.getSharedPreferences(PREF, 0) }
-    val list = remember(ep) {
+    // Server dari sumber lain (judul & nomor episode sama): dimuat saat server tanpa iklan di sumber ini habis.
+    var extra by remember(ep.id) { mutableStateOf<List<VideoSource>>(emptyList()) }
+    var look by remember(ep.id) { mutableIntStateOf(0) } // 0 belum, 1 sedang mencari, 2 selesai
+    val list = remember(ep, extra) {
         val want = prefs.getString("quality", "").orEmpty()
-        ep.sources.sortedWith(compareBy<VideoSource> { it.embed }.thenByDescending { it.quality == want }.thenByDescending { it.height })
+        val order = compareByDescending<VideoSource> { it.quality == want }.thenByDescending { it.height }
+        val all = ep.sources + extra
+        ep.sources.filter { !it.embed }.sortedWith(order) + extra.filter { !it.embed }.sortedWith(order) + all.filter { it.embed }
     }
+    val ownDirect = remember(ep) { ep.sources.count { !it.embed } }
     var idx by remember(ep.id) { mutableIntStateOf(0) }
     var failed by remember(ep.id) { mutableStateOf(false) }
     var countdown by remember(ep.id) { mutableStateOf<Int?>(null) }
-    val src = list.getOrNull(idx)
+    val holding = look == 1 && idx >= ownDirect
+    val src = if (holding) null else list.getOrNull(idx)
     val anime = ep.anime
+    LaunchedEffect(ep.id) { if (ownDirect == 0) look = 1 }
+    LaunchedEffect(look) {
+        if (look != 1) return@LaunchedEffect
+        val a = anime
+        extra = if (a == null) emptyList() else runCatching { c.stream.episodeElsewhere(a, ep.number) }.getOrDefault(emptyList())
+        if (extra.isNotEmpty()) actions.toast("Server episode ini juga diambil dari sumber lain")
+        look = 2
+    }
 
     val player = remember { ExoPlayer.Builder(ctx).setUsePlatformDiagnostics(false).build() }
     DisposableEffect(Unit) { onDispose { player.release() } }
@@ -190,21 +207,29 @@ private fun Player(ep: EpisodeData, full: Boolean, onFull: (Boolean) -> Unit) {
     LaunchedEffect(src) {
         val s = src ?: return@LaunchedEffect
         if (s.embed) { player.stop(); anime?.let { c.streamStore.saveProgress(Saved("anime", it.id, it.title, it.cover, it.type, ep.id, "Episode ${ep.number}")) }; return@LaunchedEffect }
-        val headers = mapOf("User-Agent" to UA_DESKTOP) + s.headers
+        // Header sama dengan saat halaman pemutar dibuka: beberapa token CDN (Streamruby dll.) terikat ke sidik ini.
+        val headers = mapOf("User-Agent" to UA_DESKTOP, "Accept-Language" to "id-ID,id;q=0.9,en;q=0.8") + s.headers
         val factory = OkHttpDataSource.Factory(c.stream.http.client).setDefaultRequestProperties(headers)
         val resume = if (player.currentMediaItem != null && player.currentPosition > 5000) player.currentPosition else
             c.streamStore.seen(ep.id)?.takeIf { it.pos > 15_000 && (it.dur == 0L || it.pos < it.dur - 30_000) }?.pos ?: 0L
-        player.setMediaSource(ProgressiveMediaSource.Factory(factory).createMediaSource(MediaItem.fromUri(Uri.parse(s.url))), resume)
+        val item = MediaItem.fromUri(Uri.parse(s.url))
+        val source = if (s.hls) HlsMediaSource.Factory(factory).createMediaSource(item) else ProgressiveMediaSource.Factory(factory).createMediaSource(item)
+        player.setMediaSource(source, resume)
         player.prepare()
         player.playWhenReady = true
         if (c.player.state.value.isPlaying) c.player.pause()
     }
 
-    DisposableEffect(player, list, idx) {
+    DisposableEffect(player, list, idx, look) {
         val l = object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
-                if (idx + 1 < list.size) { actions.toast("${src?.label} ${src?.quality} gagal, pindah ke ${list[idx + 1].label} ${list[idx + 1].quality}"); idx++ }
-                else failed = true
+                val nxt = list.getOrNull(idx + 1)
+                when {
+                    // Server tanpa iklan habis: cari episode ini di sumber lain dulu sebelum memakai pemutar luar.
+                    (nxt == null || nxt.embed) && look == 0 && anime != null -> { look = 1; idx++ }
+                    nxt != null -> { actions.toast("${src?.label} ${src?.quality} gagal, pindah ke ${nxt.label} ${nxt.quality}"); idx++ }
+                    else -> failed = true
+                }
             }
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) { save(); if (ep.next != null && prefs.getBoolean("autonext", true)) countdown = 8 }
@@ -245,9 +270,13 @@ private fun Player(ep: EpisodeData, full: Boolean, onFull: (Boolean) -> Unit) {
     Column {
         Box(if (full) Modifier.fillMaxSize().background(Color.Black) else Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(Color.Black)) {
             when {
+                holding -> Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator(color = Color.White); Spacer(Modifier.height(10.dp))
+                    Text("Server di sumber ini kosong — mencari episode ini di sumber lain…", color = Color.White, textAlign = TextAlign.Center)
+                }
                 src == null -> Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Rounded.Warning, null, tint = Color.White); Spacer(Modifier.height(8.dp))
-                    Text("Belum ada server yang bisa diputar tanpa iklan untuk episode ini.", color = Color.White, textAlign = TextAlign.Center)
+                    Text("Episode ini belum bisa diputar: semua servernya mati atau dihapus, dan sumber lain juga belum punya episode ini.", color = Color.White, textAlign = TextAlign.Center)
                 }
                 src.embed -> EmbedFrame(src)
                 else -> AndroidView(factory = { ctx2 ->
@@ -275,7 +304,7 @@ private fun Player(ep: EpisodeData, full: Boolean, onFull: (Boolean) -> Unit) {
             FlowRow(Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 list.forEachIndexed { i, s ->
                     val on = i == idx
-                    Text("${s.label} · ${s.quality}" + if (s.embed) " · pembatas" else "", style = MaterialTheme.typography.labelMedium, color = if (on) Color.White else MaterialTheme.colorScheme.onBackground,
+                    Text("${s.label} · ${s.quality}" + if (s.embed) " · pemutar luar" else if (s.hls) " · HLS" else "", style = MaterialTheme.typography.labelMedium, color = if (on) Color.White else MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.clip(RoundedCornerShape(50))
                             .background(if (on) Brush.linearGradient(listOf(Freease.accent.primary, Freease.accent.secondary)) else Brush.linearGradient(listOf(Freease.colors.card, Freease.colors.card)))
                             .clickable { if (!s.embed) prefs.edit().putString("quality", s.quality).apply(); failed = false; idx = i }.padding(horizontal = 10.dp, vertical = 6.dp))
