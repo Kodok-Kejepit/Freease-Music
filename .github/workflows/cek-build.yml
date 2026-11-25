@@ -36,6 +36,12 @@ jobs:
         working-directory: android
         run: ./gradlew --no-daemon testDebugUnitTest
 
+      - name: Uji langsung sumber Stream
+        if: always()
+        continue-on-error: true
+        working-directory: android
+        run: ./gradlew --no-daemon testDebugUnitTest -PstreamLive --tests '*StreamLiveProbe*' && cat app/build/reports/stream-live.txt >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -47,5 +53,5 @@ jobs:
         if: failure()
         with:
           name: laporan-tes
-          path: android/app/build/reports/tests/
+          path: android/app/build/reports/
           retention-days: 7
