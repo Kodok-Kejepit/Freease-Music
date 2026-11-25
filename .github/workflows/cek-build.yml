@@ -40,7 +40,9 @@ jobs:
         if: always()
         continue-on-error: true
         working-directory: android
-        run: ./gradlew --no-daemon testDebugUnitTest -PstreamLive --tests '*StreamLiveProbe*' && cat app/build/reports/stream-live.txt >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          ./gradlew --no-daemon testDebugUnitTest -PstreamLive --tests '*StreamLiveProbe*'
+          cat app/build/reports/stream-live.txt | tee -a "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
         if: always()
